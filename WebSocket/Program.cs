@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace WebSocket
+namespace WebSocketServer
 {
     public class Program
     {
@@ -16,6 +16,8 @@ namespace WebSocket
         {
             CreateWebHostBuilder(args).Build().Run();
         }
+
+
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)

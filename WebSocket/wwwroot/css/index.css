@@ -1,0 +1,18 @@
+﻿body {
+    padding: 0;
+    margin: 0;
+}
+
+html, body, div {
+    box-sizing: border-box;
+}
+
+#output {
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #999;
+    height: 50vh;
+    width: 50vw;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}

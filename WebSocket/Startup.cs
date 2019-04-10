@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace WebSocket
+namespace WebSocketServer
 {
     public class Startup
     {
@@ -25,10 +25,10 @@ namespace WebSocket
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            app.Map("/ws", SocketHandler.Map);
         }
     }
 }
