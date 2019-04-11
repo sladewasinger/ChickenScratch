@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,11 +13,14 @@ namespace WebSocketServer
     public class SocketHandler
     {
         public const int BufferSize = 4096;
+
+        public readonly Guid ID = Guid.NewGuid();
         readonly WebSocket socket;
 
         SocketHandler(WebSocket socket)
         {
             this.socket = socket;
+            SocketsManager.AddSocket(ID, socket);
         }
 
         async Task EchoLoop()
@@ -25,10 +30,16 @@ namespace WebSocketServer
 
             while (socket.State == WebSocketState.Open)
             {
-                var incoming = await this.socket.ReceiveAsync(seg, CancellationToken.None);
-                var outgoing = new ArraySegment<byte>(buffer, 0, incoming.Count);
-                await socket.SendAsync(outgoing, WebSocketMessageType.Text, true, CancellationToken.None);
+                var incoming = await socket.ReceiveAsync(seg, CancellationToken.None);
+                string txt = $"From {ID}: {Encoding.UTF8.GetString(seg)}";
+
+                byte[] outgoingBytes = new byte[BufferSize];
+                Array.Copy(Encoding.UTF8.GetBytes(txt), outgoingBytes, BufferSize);
+                var outgoing = new ArraySegment<byte>(outgoingBytes, 0, outgoingBytes.Length);
+                await SocketsManager.SendAll(outgoing);
             }
+
+            SocketsManager.RemoveSocket(ID);
         }
 
         static async Task Acceptor(HttpContext hc, Func<Task> n)
