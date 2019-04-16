@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -64,17 +65,20 @@ namespace WebSocketServer
                     HubData o = JsonConvert.DeserializeObject<HubData>(dataArgs.Data);
 
                     string methodName = o.MethodName;
-                    object data = o.Data;
+                    JObject data = o.Data as JObject;
+
 
                     var method = hub.GetType().GetMethod(methodName,
                         BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     var methodParameters = method?.GetParameters();
+
+                    object[] targetParams = null;
                     if (method != null && methodParameters.Any())
                     {
                         var param0 = methodParameters[0];
-                        data = JsonConvert.DeserializeObject(JsonConvert.SerializeObject(data), param0.ParameterType);
+                        targetParams = new object[] { data.ToObject(param0.ParameterType) };
                     }
-                    method.Invoke(hub, new object[] { data });
+                    method.Invoke(hub, targetParams);
                     //hub.OnDataReceived(dataArgs.Data);
                 }
             }
