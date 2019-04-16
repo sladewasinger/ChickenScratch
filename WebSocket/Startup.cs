@@ -28,7 +28,12 @@ namespace WebSocketServer
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            app.Map("/ws", SocketHandler.Map);
+            app.Map("/ws", a => {
+                a.UseWebSockets();
+                a.Use(SocketManager.SocketAcceptor);
+            });
+
+            SocketManager.RegisterHub<ChatHub>();
         }
     }
 }

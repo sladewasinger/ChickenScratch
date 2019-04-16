@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +16,31 @@ namespace WebSocketServer
     public static class SocketManager
     {
         static ConcurrentDictionary<Guid, WSocket> webSockets = new ConcurrentDictionary<Guid, WSocket>();
+        static ConcurrentBag<Type> hubs = new ConcurrentBag<Type>();
+
+        public static void RegisterHub<T>() where T : Hub
+        {
+            hubs.Add(typeof(T));
+        }
 
         public static async Task AddSocket(WSocket webSocket)
         {
             webSockets.TryAdd(webSocket.ID, webSocket);
             webSocket.DataReceived += DataReceived;
+
             await webSocket.ListenLoop();
+        }
+
+        public static async Task SocketAcceptor(HttpContext hc, Func<Task> n)
+        {
+            if (!hc.WebSockets.IsWebSocketRequest)
+            {
+                return;
+            }
+
+            var socket = await hc.WebSockets.AcceptWebSocketAsync();
+
+            await AddSocket(new WSocket(Guid.NewGuid(), socket));
         }
 
         public static void RemoveSocket(Guid id)
@@ -28,24 +50,53 @@ namespace WebSocketServer
 
         public static async void DataReceived(object sender, EventArgs e)
         {
-            if (!(e is DataArgs dataArgs))
+            if (!(e is WebSocketDataArgs dataArgs))
             {
                 return;
             }
 
-            await Echo(dataArgs.WSocket, dataArgs.Data);
+            try
+            {
+                foreach (var hubType in hubs)
+                {
+                    var hub = hubType.GetConstructor(new Type[] { }).Invoke(new object[] { });
+
+                    HubData o = JsonConvert.DeserializeObject<HubData>(dataArgs.Data);
+
+                    string methodName = o.MethodName;
+                    object data = o.Data;
+
+                    var method = hub.GetType().GetMethod(methodName,
+                        BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                    var methodParameters = method?.GetParameters();
+                    if (method != null && methodParameters.Any())
+                    {
+                        var param0 = methodParameters[0];
+                        data = JsonConvert.DeserializeObject(JsonConvert.SerializeObject(data), param0.ParameterType);
+                    }
+                    method.Invoke(hub, new object[] { data });
+                    //hub.OnDataReceived(dataArgs.Data);
+                }
+            }
+            catch(Exception ex)
+            {
+                //log ex here
+                await SendAll(ex);
+            }
+
+            //await Echo(dataArgs.WSocket, dataArgs.Data);
         }
 
-        public static async Task Echo(WSocket wSocket, string data)
+        public static async Task Echo<T>(WSocket wSocket, T data)
         {
             await SendAll($"[ID: {wSocket.ID}]: {data}");
         }
 
-        public static async Task SendAll(string data)
+        public static async Task SendAll<T>(T data)
         {
-            foreach(var socket in webSockets.Values)
+            foreach (var socket in webSockets.Values)
             {
-                await socket.SendData(data);
+                await socket.SendData(JsonConvert.SerializeObject(data));
             }
         }
     }

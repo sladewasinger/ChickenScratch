@@ -23,8 +23,13 @@ function doDisconnect() {
 
 function doSend() {
     let text = "[" + new Date() + "] TEST";
-    write("Sending: " + text);
-    socket.send(text);
+
+    let hubData = {
+        methodName: "testMethodABC",
+        data: { author: "client", message: text }
+    };
+    write("Sending: " + JSON.stringify(hubData));
+    socket.send(JSON.stringify(hubData));
 }
 
 function onInit() {

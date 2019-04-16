@@ -10,7 +10,7 @@ namespace WebSocketServer
 {
     public class WSocket
     {
-        public class DataArgs: EventArgs
+        public class WebSocketDataArgs : EventArgs
         {
             public string Data { get; set; }
             public WSocket WSocket { get; set; }
@@ -23,7 +23,7 @@ namespace WebSocketServer
 
         public event EventHandler DataReceived;
 
-        protected virtual void OnDataReceived(DataArgs e)
+        protected virtual void OnDataReceived(WebSocketDataArgs e)
         {
             EventHandler handler = DataReceived;
             handler?.Invoke(this, e);
@@ -45,7 +45,7 @@ namespace WebSocketServer
                 var incoming = await _socket.ReceiveAsync(seg, CancellationToken.None);
                 if (_socket.State != WebSocketState.Open)
                     break;
-                OnDataReceived(new DataArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
+                OnDataReceived(new WebSocketDataArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
             }
 
             SocketManager.RemoveSocket(ID);
@@ -55,8 +55,8 @@ namespace WebSocketServer
         {
             if (_socket.State == WebSocketState.Open)
             {
-                byte[] outgoingBytes = new byte[BufferSize];
-                Array.Copy(Encoding.UTF8.GetBytes(data), outgoingBytes, BufferSize);
+                byte[] outgoingBytes = Encoding.UTF8.GetBytes(data);
+                //Array.Copy(Encoding.UTF8.GetBytes(data), outgoingBytes, BufferSize);
                 var outgoing = new ArraySegment<byte>(outgoingBytes, 0, outgoingBytes.Length);
                 await _socket.SendAsync(outgoing, WebSocketMessageType.Text, true, CancellationToken.None);
             }
