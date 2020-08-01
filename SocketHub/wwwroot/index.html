@@ -10,9 +10,17 @@
     <h1>Web Sockets in C#</h1>
     <h3>C# Server &amp; JavaScript Client</h3>
 
-    <button id="start" onclick="doConnect()">Connect</button>
-    <button id="test" onclick="doSend()">Send Test</button>
-    <button id="close" onclick="doDisconnect()">Disconnect</button>
+    <div>
+        <button id="start" onclick="doConnect()">Connect</button>
+        <button id="test" onclick="doSend()">Send Test</button>
+        <button id="close" onclick="doDisconnect()">Disconnect</button>
+        <button id="myTurn" onclick="toggleMyTurn()">my turn</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+
     <div id="output"></div>
+
 </body>
 </html>

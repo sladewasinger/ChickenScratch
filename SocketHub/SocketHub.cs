@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using static WebSocketServer.WSocket;
 
@@ -95,9 +92,20 @@ namespace WebSocketServer
 
         public static async Task SendAll<T>(T data)
         {
+            DefaultContractResolver contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
+
+            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = contractResolver,
+                Formatting = Formatting.None
+            };
+
             foreach (var socket in webSockets.Values)
             {
-                await socket.SendData(JsonConvert.SerializeObject(data));
+                await socket.SendData(JsonConvert.SerializeObject(data, jsonSerializerSettings));
             }
         }
     }

@@ -12,5 +12,10 @@ namespace WebSocketServer
             var a = data;
             await SocketHub.SendAll(data);        
         }
+
+        public async void Draw()
+        {
+            await SocketHub.SendAll(ImageRepository.ImageBag.Last());
+        }
     }
 }
