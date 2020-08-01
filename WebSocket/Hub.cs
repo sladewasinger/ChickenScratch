@@ -7,6 +7,7 @@ namespace WebSocketServer
 {
     public class Hub
     {
+
         public virtual void OnConnected()
         {
 

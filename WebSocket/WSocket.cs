@@ -48,7 +48,7 @@ namespace WebSocketServer
                 OnDataReceived(new WebSocketDataArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
             }
 
-            SocketManager.RemoveSocket(ID);
+            SocketHub.RemoveSocket(ID);
         }
 
         public async Task SendData(string data)

@@ -7,9 +7,10 @@ namespace WebSocketServer
 {
     public class ChatHub : Hub
     {
-        public void TestMethodABC(ChatMessage data)
+        public async void TestMethodABC(ChatMessage data)
         {
             var a = data;
+            await SocketHub.SendAll(data);        
         }
     }
 }

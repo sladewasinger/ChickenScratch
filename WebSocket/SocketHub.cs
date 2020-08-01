@@ -14,7 +14,7 @@ using static WebSocketServer.WSocket;
 
 namespace WebSocketServer
 {
-    public static class SocketManager
+    public static class SocketHub
     {
         static ConcurrentDictionary<Guid, WSocket> webSockets = new ConcurrentDictionary<Guid, WSocket>();
         static ConcurrentBag<Type> hubs = new ConcurrentBag<Type>();
@@ -79,7 +79,6 @@ namespace WebSocketServer
                         targetParams = new object[] { data.ToObject(param0.ParameterType) };
                     }
                     method.Invoke(hub, targetParams);
-                    //hub.OnDataReceived(dataArgs.Data);
                 }
             }
             catch(Exception ex)
@@ -87,8 +86,6 @@ namespace WebSocketServer
                 //log ex here
                 await SendAll(ex);
             }
-
-            //await Echo(dataArgs.WSocket, dataArgs.Data);
         }
 
         public static async Task Echo<T>(WSocket wSocket, T data)
