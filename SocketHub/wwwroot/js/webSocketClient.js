@@ -33,13 +33,15 @@ function doConnect() {
 }
 
 async function onMessage(e) {
-    console.log("Received Image Data: ", e);
-    var response = await fetch("api/image/", {
-        method: "GET"
-    });
-    var data = await response.text();
-    console.log(data);
+    console.log("Received Message: ", e);
+    
     if (!myTurn) {
+        var response = await fetch("api/image/", {
+            method: "GET"
+        });
+        var data = await response.text();
+        console.log(data);
+
         var img = new Image();
         img.onload = () => {
             var canvas = document.getElementById("canvas");
@@ -59,7 +61,7 @@ function doDisconnect() {
 async function doSend() {
     var canvas = document.getElementById("canvas");
 
-    var canvasDataURL = canvas.toDataURL('image/jpeg', 0.6);
+    var canvasDataURL = canvas.toDataURL('image/jpeg', 0.3);
 
     let data = { author: 'test', canvasBase64: canvasDataURL };
 
@@ -90,7 +92,6 @@ function draw() {
 
     if (myTurn) {
         if (drawing) {
-            console.log("drawing!");
             //ctx.strokeStyle = ""
             ctx.lineTo(mouseX, mouseY);
             ctx.stroke();
@@ -119,7 +120,9 @@ function onInit() {
         var ctx = canvas.getContext("2d");
         ctx.beginPath();
 
-        doSend();
+        if (myTurn) {
+            doSend();
+        }
     });
     canvas.addEventListener("mousemove", (e) => {
         oldMouseX = mouseX;
