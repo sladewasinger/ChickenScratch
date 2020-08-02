@@ -46,9 +46,9 @@ async function onMessage(e) {
         img.onload = () => {
             var canvas = document.getElementById("canvas");
             var ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, 0, 0);
             console.log("DREW IMAGE!");
-            document.body.appendChild(img);
         };
         img.src = data;
     }
@@ -110,9 +110,12 @@ function onInit() {
     var ctx = canvas.getContext("2d");
     ctx.fillStyle = "rgb(255,255,255)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
 
-
-    canvas.addEventListener("mousedown", () => drawing = true);
+    canvas.addEventListener("mousedown", () => {
+        ctx.beginPath();
+        drawing = true
+    });
     canvas.addEventListener("mouseup", () => {
         drawing = false;
         // draw crap
