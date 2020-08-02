@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebSocketServer.Hubs;
+using WebSocketServer.Repositories;
 
 namespace WebSocketServer
 {
@@ -19,9 +21,12 @@ namespace WebSocketServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton<ImageRepository>();
+            services.AddHub<DrawHub>();
+            services.RegisterHubSockets();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SocketHandler socketHandler)
         {
             if (env.IsDevelopment())
             {
@@ -45,12 +50,14 @@ namespace WebSocketServer
                 endpoints.MapControllers();
             });
 
-            app.Map("/ws", a => {
-                a.UseWebSockets();
-                a.Use(SocketHub.SocketAcceptor);
-            });
+            app.UseHubSockets(socketHandler, typeof(Startup).Assembly);
 
-            SocketHub.RegisterHub<ChatHub>();
+            //app.Map("/ws", a => {
+            //    a.UseWebSockets();
+            //    a.Use(SocketHub.SocketAcceptor);
+            //});
+
+            //SocketHub.RegisterHub<DrawHub>();
         }
     }
 }

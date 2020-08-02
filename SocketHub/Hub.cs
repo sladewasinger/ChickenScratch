@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WebSocketServer
 {
-    public class Hub
+    public class Hub : IHub
     {
+        public readonly Guid ConnectionId;
+
+        public Hub() { }
 
         public virtual void OnConnected()
         {

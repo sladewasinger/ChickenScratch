@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -10,12 +8,6 @@ namespace WebSocketServer
 {
     public class WSocket
     {
-        public class WebSocketDataArgs : EventArgs
-        {
-            public string Data { get; set; }
-            public WSocket WSocket { get; set; }
-        }
-
         public Guid ID { get; set; }
 
         private const int BufferSize = 4028;
@@ -48,7 +40,8 @@ namespace WebSocketServer
                 OnDataReceived(new WebSocketDataArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
             }
 
-            SocketHub.RemoveSocket(ID);
+            // SocketHub.RemoveSocket(ID);
+            // Moved to SocketHandler ^
         }
 
         public async Task SendData(string data)

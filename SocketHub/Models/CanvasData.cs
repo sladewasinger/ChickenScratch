@@ -1,4 +1,4 @@
-﻿namespace WebSocketServer
+﻿namespace WebSocketServer.Models
 {
     public class CanvasData
     {
