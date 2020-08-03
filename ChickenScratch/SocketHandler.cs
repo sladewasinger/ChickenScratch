@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using WebSocketServer.Repositories;
+using ChickenScratch.Repositories;
 
-namespace WebSocketServer
+namespace ChickenScratch
 {
     public class SocketHandler
     {

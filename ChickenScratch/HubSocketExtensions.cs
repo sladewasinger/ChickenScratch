@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using WebSocketServer.Repositories;
+using ChickenScratch.Repositories;
 
-namespace WebSocketServer
+namespace ChickenScratch
 {
     public static class HubSocketExtensions
     {

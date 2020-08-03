@@ -1,6 +1,6 @@
-﻿using WebSocketServer.Repositories;
+﻿using ChickenScratch.Repositories;
 
-namespace WebSocketServer.Hubs
+namespace ChickenScratch.Hubs
 {
     public class DrawHub : Hub
     {

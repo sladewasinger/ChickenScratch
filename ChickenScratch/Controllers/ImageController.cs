@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using WebSocketServer.Models;
-using WebSocketServer.Repositories;
+using ChickenScratch.Models;
+using ChickenScratch.Repositories;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebSocketServer.Controllers
+namespace ChickenScratch.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

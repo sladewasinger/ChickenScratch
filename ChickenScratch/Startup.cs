@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using WebSocketServer.Hubs;
-using WebSocketServer.Repositories;
+using ChickenScratch.Hubs;
+using ChickenScratch.Repositories;
 
-namespace WebSocketServer
+namespace ChickenScratch
 {
     public class Startup
     {

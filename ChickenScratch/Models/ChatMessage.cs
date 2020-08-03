@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebSocketServer.Models
+namespace ChickenScratch.Models
 {
     public class ChatMessage
     {

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace WebSocketServer.Repositories
+namespace ChickenScratch.Repositories
 {
     public abstract class StringKeyRepository<T>
     {

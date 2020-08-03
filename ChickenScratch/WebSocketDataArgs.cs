@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebSocketServer
+namespace ChickenScratch
 {
     public class WebSocketDataArgs : EventArgs
     {

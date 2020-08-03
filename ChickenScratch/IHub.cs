@@ -1,4 +1,4 @@
-﻿namespace WebSocketServer
+﻿namespace ChickenScratch
 {
     public interface IHub
     {

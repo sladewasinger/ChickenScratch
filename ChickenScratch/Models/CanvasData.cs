@@ -1,4 +1,4 @@
-﻿namespace WebSocketServer.Models
+﻿namespace ChickenScratch.Models
 {
     public class CanvasData
     {

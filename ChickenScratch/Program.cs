@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace WebSocketServer
+namespace ChickenScratch
 {
     public class Program
     {
