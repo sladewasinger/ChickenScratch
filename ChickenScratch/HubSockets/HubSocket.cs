@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChickenScratch
 {
-    public class WSocket
+    public class HubSocket : IDisposable
     {
         public Guid ID { get; set; }
 
@@ -15,13 +15,12 @@ namespace ChickenScratch
 
         public event EventHandler DataReceived;
 
-        protected virtual void OnDataReceived(WebSocketDataArgs e)
+        protected virtual void OnDataReceived(HubSocketEventArgs e)
         {
-            EventHandler handler = DataReceived;
-            handler?.Invoke(this, e);
+            DataReceived?.Invoke(this, e);
         }
 
-        public WSocket(Guid id, WebSocket socket)
+        public HubSocket(Guid id, WebSocket socket)
         {
             ID = id;
             _socket = socket;
@@ -34,14 +33,11 @@ namespace ChickenScratch
 
             while (true)
             {
-                var incoming = await _socket.ReceiveAsync(seg, CancellationToken.None);
+                await _socket.ReceiveAsync(seg, CancellationToken.None);
                 if (_socket.State != WebSocketState.Open)
                     break;
-                OnDataReceived(new WebSocketDataArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
+                OnDataReceived(new HubSocketEventArgs() { Data = Encoding.UTF8.GetString(seg), WSocket = this });
             }
-
-            // SocketHub.RemoveSocket(ID);
-            // Moved to SocketHandler ^
         }
 
         public async Task SendData(string data)
@@ -53,6 +49,15 @@ namespace ChickenScratch
                 var outgoing = new ArraySegment<byte>(outgoingBytes, 0, outgoingBytes.Length);
                 await _socket.SendAsync(outgoing, WebSocketMessageType.Text, true, CancellationToken.None);
             }
+            else
+            {
+                throw new Exception("Attempted to send data but the unerlying socket is not open!");
+            }
+        }
+
+        public void Dispose()
+        {
+            _socket.Dispose();
         }
     }
 }

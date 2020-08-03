@@ -2,9 +2,9 @@
 
 namespace ChickenScratch
 {
-    public class WebSocketDataArgs : EventArgs
+    public class HubSocketEventArgs : EventArgs
     {
         public string Data { get; set; }
-        public WSocket WSocket { get; set; }
+        public HubSocket WSocket { get; set; }
     }
 }

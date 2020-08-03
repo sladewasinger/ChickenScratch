@@ -7,23 +7,23 @@ namespace ChickenScratch
 {
     public static class HubSocketExtensions
     {
-        public static void UseHubSockets(this IApplicationBuilder app, SocketHandler socketHandler, params Assembly[] assemblies)
+        public static void UseHubSockets(this IApplicationBuilder app, HubSocketAcceptor socketAcceptor, params Assembly[] assemblies)
         {
-            socketHandler.RegisterHubTypes(assemblies);
+            socketAcceptor.RegisterHubTypes(assemblies);
 
             app.Map("/ws", a => {
                 a.UseWebSockets();
-                a.Use(socketHandler.SocketAcceptor);
+                a.Use(socketAcceptor.SocketAcceptor);
             });
         }
 
         public static void RegisterHubSockets(this IServiceCollection services)
         {
-            services.AddSingleton<SocketHandler>();
+            services.AddSingleton<HubSocketAcceptor>();
             services.AddSingleton<HubSocketRepository>();
         }
 
-        public static void AddHub<THub>(this IServiceCollection services) where THub : class
+        public static void AddHub<THub>(this IServiceCollection services) where THub : Hub
         {
             services.AddTransient<THub>();
         }

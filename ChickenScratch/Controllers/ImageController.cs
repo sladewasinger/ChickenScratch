@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using ChickenScratch.Models;
 using ChickenScratch.Repositories;
 

@@ -1,6 +1,6 @@
 ﻿namespace ChickenScratch.Repositories
 {
-    public class HubSocketRepository : StringKeyRepository<WSocket>
+    public class HubSocketRepository : StringKeyRepository<HubSocket>
     {
     }
 }

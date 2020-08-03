@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +25,7 @@ namespace ChickenScratch
             services.RegisterHubSockets();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SocketHandler socketHandler)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, HubSocketAcceptor socketAcceptor)
         {
             if (env.IsDevelopment())
             {
@@ -50,14 +49,7 @@ namespace ChickenScratch
                 endpoints.MapControllers();
             });
 
-            app.UseHubSockets(socketHandler, typeof(Startup).Assembly);
-
-            //app.Map("/ws", a => {
-            //    a.UseWebSockets();
-            //    a.Use(SocketHub.SocketAcceptor);
-            //});
-
-            //SocketHub.RegisterHub<DrawHub>();
+            app.UseHubSockets(socketAcceptor, typeof(Startup).Assembly);
         }
     }
 }

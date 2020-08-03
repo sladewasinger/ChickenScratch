@@ -2,10 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,22 +11,13 @@ using ChickenScratch.Repositories;
 
 namespace ChickenScratch
 {
-    public class SocketHandler
+    public class HubSocketAcceptor
     {
         private ConcurrentBag<Type> hubTypes = new ConcurrentBag<Type>();
-
-        private readonly JsonSerializerSettings camelCaseJsonSerializerSettings = new JsonSerializerSettings()
-        {
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            },
-            Formatting = Formatting.None
-        };
         private readonly IServiceProvider serviceProvider;
         private readonly HubSocketRepository hubSocketRepository;
 
-        public SocketHandler(IServiceProvider serviceProvider, HubSocketRepository hubSocketRepository)
+        public HubSocketAcceptor(IServiceProvider serviceProvider, HubSocketRepository hubSocketRepository)
         {
             this.serviceProvider = serviceProvider;
             this.hubSocketRepository = hubSocketRepository;
@@ -47,17 +36,6 @@ namespace ChickenScratch
             }
         }
 
-        public async Task AddSocket(WSocket webSocket)
-        {
-            hubSocketRepository.AddOrUpdate(webSocket.ID.ToString(), webSocket);
-            
-            webSocket.DataReceived += DataReceived;
-
-            await webSocket.ListenLoop(); // infinite loop until socket closed.
-
-            RemoveSocket(webSocket.ID);
-        }
-
         public async Task SocketAcceptor(HttpContext hc, Func<Task> n)
         {
             if (!hc.WebSockets.IsWebSocketRequest)
@@ -67,17 +45,31 @@ namespace ChickenScratch
 
             var socket = await hc.WebSockets.AcceptWebSocketAsync();
 
-            await AddSocket(new WSocket(Guid.NewGuid(), socket));
+            await AddSocket(new HubSocket(Guid.NewGuid(), socket));
+        }
+
+        public async Task AddSocket(HubSocket webSocket)
+        {
+            hubSocketRepository.AddOrUpdate(webSocket.ID.ToString(), webSocket);
+            webSocket.DataReceived += DataReceived;
+
+            await webSocket.ListenLoop(); // infinite loop until socket closed.
+
+            RemoveSocket(webSocket.ID);
         }
 
         public void RemoveSocket(Guid id)
         {
-            hubSocketRepository.TryRemove(id.ToString(), out WSocket removedSocket);
+            if (!hubSocketRepository.TryRemove(id.ToString(), out HubSocket removedSocket))
+            {
+                throw new Exception($"Could not remove socket with id: '{id}'");
+            }
+            removedSocket.Dispose();
         }
 
-        public async void DataReceived(object sender, EventArgs e)
+        public void DataReceived(object sender, EventArgs e)
         {
-            if (!(e is WebSocketDataArgs webSocketEventArgs))
+            if (!(e is HubSocketEventArgs hubSocketEventArgs))
             {
                 return;
             }
@@ -88,7 +80,7 @@ namespace ChickenScratch
                 {
                     var hub = serviceProvider.GetRequiredService(hubType);
 
-                    HubData o = JsonConvert.DeserializeObject<HubData>(webSocketEventArgs.Data);
+                    HubData o = JsonConvert.DeserializeObject<HubData>(hubSocketEventArgs.Data);
 
                     string methodName = o.MethodName;
                     JObject data = o.Data as JObject;
@@ -106,28 +98,11 @@ namespace ChickenScratch
                     method.Invoke(hub, targetParams);
                 }
             }
-            catch(Exception ex)
+            catch
             {
                 //log ex here
-                await SendAll(ex);
-            }
-        }
-
-        public async Task SendAll<T>(T data)
-        {
-            await SendDataToSockets(hubSocketRepository.GetAll(), data);
-        }
-
-        public async Task SendAllExcept<T>(Guid connectionId, T data)
-        {
-            await SendDataToSockets(hubSocketRepository.GetAll().Where(x => x.ID != connectionId), data);
-        }
-
-        private async Task SendDataToSockets<T>(IEnumerable<WSocket> sockets, T data)
-        {
-            foreach(var socket in sockets)
-            {
-                await socket.SendData(JsonConvert.SerializeObject(data, camelCaseJsonSerializerSettings));
+                throw;
+                //await SendAll(ex);
             }
         }
     }

@@ -4,7 +4,7 @@ namespace ChickenScratch
 {
     public class Hub : IHub
     {
-        public readonly Guid ConnectionId;
+        public Guid ConnectionId;
 
         public Hub() { }
 
