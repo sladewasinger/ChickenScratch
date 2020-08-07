@@ -1,4 +1,4 @@
-﻿namespace ChickenScratch
+﻿namespace ChickenScratch.HubSockets
 {
     public interface IHub
     {

@@ -32,26 +32,55 @@ function doConnect() {
     socket.onerror = function (e) { write("Error: " + e.data); };
 }
 
-async function onMessage(e) {
-    console.log("Received Message: ", e);
-    
-    if (!myTurn) {
-        var response = await fetch("api/image/", {
-            method: "GET"
-        });
-        var data = await response.text();
-        console.log(data);
+var hubMethods = [];
 
-        var img = new Image();
-        img.onload = () => {
-            var canvas = document.getElementById("canvas");
-            var ctx = canvas.getContext("2d");
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(img, 0, 0);
-            console.log("DREW IMAGE!");
-        };
-        img.src = data;
+function RegisterClientMethod(methodName, callback) {
+    hubMethods.push({ methodName: methodName, callback: callback });
+}
+
+async function onMessage(e) {
+    var hubData = JSON.parse(e.data);
+
+    if (!hubData || (hubData.methodName == undefined && hubData.promiseId == undefined)) {
+        console.log("Received corrupted hub data: ", e.data);
     }
+
+    if (hubData.promiseId != undefined && hubData.promiseId != -1) {
+        var promise = requestPromises.find(x => x.promiseId == hubData.promiseId);
+        if (promise) {
+            // console.log("Received Immediate Callback response! PromiseId: ", hubData.promiseId);
+            promise.resolve(hubData.data);
+            return;
+        }
+    } else {
+        var hubMethod = hubMethods.find(x => x.methodName == hubData.methodName);
+        if (hubMethod) {
+            // console.log("Received message with no explicit client origin");
+            hubMethod.callback(hubData.data);
+            return;
+        }
+    }
+
+    console.log("Received data, but nothing is listening for it!");
+
+    //// crap code here: -- this is just me testing stuff:
+    //if (false && !myTurn) {
+    //    var response = await fetch("api/image/", {
+    //        method: "GET"
+    //    });
+    //    var data = await response.text();
+    //    console.log(data);
+
+    //    var img = new Image();
+    //    img.onload = () => {
+    //        var canvas = document.getElementById("canvas");
+    //        var ctx = canvas.getContext("2d");
+    //        ctx.imageSmoothingEnabled = false;
+    //        ctx.drawImage(img, 0, 0);
+    //        console.log("DREW IMAGE!");
+    //    };
+    //    img.src = data;
+    //}
 }
 
 function doDisconnect() {
@@ -78,10 +107,63 @@ async function doSend() {
 
     let hubData = {
         methodName: "draw",
-        data: { }
+        data: {}
     };
     write("Sending: " + JSON.stringify(hubData));
     socket.send(JSON.stringify(hubData));
+}
+
+var promiseIdCounter = 0;
+var requestPromises = [];
+async function sendWithPromise(methodName, data) {
+    let hubData = {
+        methodName: methodName,
+        data: data,
+        promiseId: promiseIdCounter
+    };
+
+    let stringData = JSON.stringify(hubData);
+    socket.send(stringData);
+
+    return new Promise((resolve, reject) => {
+        requestPromises.push({ resolve: resolve, promiseId: promiseIdCounter });
+        setTimeout(() => {
+            reject("request timed out!")
+        }, 3000);
+    });
+
+    promiseIdCounter++;
+    if (promiseIdCounter >= Number.MAX_VALUE) {
+        promiseIdCounter = 0;
+    }
+}
+
+async function createLobby() {
+    console.log("starting request to create lobby");
+
+    try {
+        var response = await sendWithPromise("createLobby", {
+            lobbyName: "FirstLobby1"
+        });
+
+        console.log("LOBBY CREATION RESPONSE: ", response);
+    }
+    catch (error) {
+        console.log("lobby creation failed!");
+    }
+}
+
+async function createPlayer() {
+    let hubData = {
+        methodName: "createLobby",
+        data: {
+            lobbyName: "FirstLobby1"
+        }
+    };
+    write("Sending: " + JSON.stringify(hubData));
+    var response = await socket.send(JSON.stringify(hubData));
+
+    console.log(response);
 }
 
 function draw() {
@@ -99,6 +181,10 @@ function draw() {
     }
 
     window.requestAnimationFrame(draw);
+}
+
+function lobbyCreated(data) {
+    console.log("Lobby created callback! Data: ", data);
 }
 
 function onInit() {
@@ -134,8 +220,14 @@ function onInit() {
         mouseY = e.offsetY;
     });
 
-    draw();
 
+    /// TESTING:
+
+    RegisterClientMethod("LobbyCreated", lobbyCreated);
+
+
+
+    draw();
 }
 
 window.onload = onInit;

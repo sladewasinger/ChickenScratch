@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ChickenScratch.HubSockets;
 
-namespace ChickenScratch
+namespace ChickenScratch.HubSockets
 {
     public class Hub : IHub
     {
-        public Guid ConnectionId;
+        public HubSocketClients Clients { get; set; }
+        public HubSocketContext Context { get; set; }
 
         public Hub() { }
 

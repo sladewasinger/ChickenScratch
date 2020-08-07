@@ -8,8 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ChickenScratch.Repositories;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using System.Collections.Generic;
 
-namespace ChickenScratch
+namespace ChickenScratch.HubSockets
 {
     public class HubSocketAcceptor
     {
@@ -48,26 +50,26 @@ namespace ChickenScratch
             await AddSocket(new HubSocket(Guid.NewGuid(), socket));
         }
 
-        public async Task AddSocket(HubSocket webSocket)
+        public async Task AddSocket(HubSocket hubSocket)
         {
-            hubSocketRepository.AddOrUpdate(webSocket.ID.ToString(), webSocket);
-            webSocket.DataReceived += DataReceived;
+            hubSocketRepository.AddOrUpdate(hubSocket.ID, hubSocket);
+            hubSocket.DataReceived += DataReceived;
 
-            await webSocket.ListenLoop(); // infinite loop until socket closed.
+            await hubSocket.ListenLoop(); // infinite loop until socket closed.
 
-            RemoveSocket(webSocket.ID);
+            RemoveSocket(hubSocket.ID);
         }
 
         public void RemoveSocket(Guid id)
         {
-            if (!hubSocketRepository.TryRemove(id.ToString(), out HubSocket removedSocket))
+            if (!hubSocketRepository.TryRemove(id, out HubSocket removedSocket))
             {
                 throw new Exception($"Could not remove socket with id: '{id}'");
             }
             removedSocket.Dispose();
         }
 
-        public void DataReceived(object sender, EventArgs e)
+        public async void DataReceived(object sender, EventArgs e)
         {
             if (!(e is HubSocketEventArgs hubSocketEventArgs))
             {
@@ -78,24 +80,64 @@ namespace ChickenScratch
             {
                 foreach (var hubType in hubTypes)
                 {
-                    var hub = serviceProvider.GetRequiredService(hubType);
+                    Hub hub = serviceProvider.GetRequiredService(hubType) as Hub;
+                    hub.Clients = serviceProvider.GetRequiredService<HubSocketClients>();
+                    hub.Context = new HubSocketContext(hubSocketEventArgs.HubSocket);
 
-                    HubData o = JsonConvert.DeserializeObject<HubData>(hubSocketEventArgs.Data);
+                    HubData requestHubData = JsonConvert.DeserializeObject<HubData>(hubSocketEventArgs.Data);
 
-                    string methodName = o.MethodName;
-                    JObject data = o.Data as JObject;
+                    string methodName = requestHubData.MethodName;
+                    JObject data = requestHubData.Data as JObject;
 
                     var method = hub.GetType().GetMethod(methodName,
                         BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                    var methodParameters = method?.GetParameters();
 
-                    object[] targetParams = null;
-                    if (method != null && methodParameters.Any())
+                    if (method != null)
                     {
-                        var param0 = methodParameters[0];
-                        targetParams = new object[] { data.ToObject(param0.ParameterType) };
+                        var methodParameters = method.GetParameters();
+                        List<object> targetParams = null;
+
+                        if (methodParameters.Any())
+                        {
+                            targetParams = new List<object>();
+                            var jProperties = data.Properties();
+
+                            foreach (var param in methodParameters)
+                            {
+                                var jProp = jProperties.Single(x => x.Name == param.Name);
+                                targetParams.Add(jProp.ToObject(param.ParameterType));
+                            }
+                            //var param0 = methodParameters[0];
+                            //targetParams = new object[] { data.ToObject(param0.ParameterType) };
+                        }
+
+                        try
+                        {
+                            var task = (Task)method.Invoke(hub, targetParams?.ToArray());
+
+                            await task.ConfigureAwait(false);
+
+                            var resultProperty = task.GetType().GetProperty("Result");
+                            var response = resultProperty.GetValue(task);
+
+                            if (response != null)
+                            {
+                                HubData immediateResponse = new HubData()
+                                {
+                                    Data = response,
+                                    MethodName = null,
+                                    PromiseId = requestHubData.PromiseId
+                                };
+                                
+                                await hubSocketEventArgs.HubSocket.SendData(immediateResponse);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await hub.Clients.SendToClient("Error", hub.Context.ConnectionId, ex);
+                        }
                     }
-                    method.Invoke(hub, targetParams);
+
                 }
             }
             catch

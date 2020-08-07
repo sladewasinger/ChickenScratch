@@ -1,6 +1,9 @@
-﻿namespace ChickenScratch.Repositories
+﻿using ChickenScratch.HubSockets;
+using System;
+
+namespace ChickenScratch.Repositories
 {
-    public class HubSocketRepository : StringKeyRepository<HubSocket>
+    public class HubSocketRepository : GenericKeyRepositoryBase<Guid, HubSocket>
     {
     }
 }

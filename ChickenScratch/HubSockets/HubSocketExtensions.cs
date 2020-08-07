@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ChickenScratch.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using ChickenScratch.Repositories;
 
-namespace ChickenScratch
+namespace ChickenScratch.HubSockets
 {
     public static class HubSocketExtensions
     {
@@ -21,6 +21,7 @@ namespace ChickenScratch
         {
             services.AddSingleton<HubSocketAcceptor>();
             services.AddSingleton<HubSocketRepository>();
+            services.AddSingleton<HubSocketClients>();
         }
 
         public static void AddHub<THub>(this IServiceCollection services) where THub : Hub
