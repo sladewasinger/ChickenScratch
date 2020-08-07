@@ -125,7 +125,7 @@ async function sendWithPromise(methodName, data) {
     let stringData = JSON.stringify(hubData);
     socket.send(stringData);
 
-    return new Promise((resolve, reject) => {
+    var promise = new Promise((resolve, reject) => {
         requestPromises.push({ resolve: resolve, promiseId: promiseIdCounter });
         setTimeout(() => {
             reject("request timed out!")
@@ -136,6 +136,8 @@ async function sendWithPromise(methodName, data) {
     if (promiseIdCounter >= Number.MAX_VALUE) {
         promiseIdCounter = 0;
     }
+
+    return promise;
 }
 
 async function createLobby() {
