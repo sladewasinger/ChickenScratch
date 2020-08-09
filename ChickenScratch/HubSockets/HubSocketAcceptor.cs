@@ -38,16 +38,19 @@ namespace ChickenScratch.HubSockets
             }
         }
 
-        public async Task SocketAcceptor(HttpContext hc, Func<Task> n)
+        public async Task SocketAcceptor(HttpContext context, Func<Task> next)
         {
-            if (!hc.WebSockets.IsWebSocketRequest)
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/websockets?view=aspnetcore-3.1
+            if (context.WebSockets.IsWebSocketRequest)
             {
-                return;
+                var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                await AddSocket(new HubSocket(Guid.NewGuid(), webSocket));
             }
-
-            var socket = await hc.WebSockets.AcceptWebSocketAsync();
-
-            await AddSocket(new HubSocket(Guid.NewGuid(), socket));
+            else
+            {
+                context.Response.StatusCode = 400;
+            }
+            await next();
         }
 
         public async Task AddSocket(HubSocket hubSocket)
@@ -107,29 +110,30 @@ namespace ChickenScratch.HubSockets
                                 var jProp = jProperties.Single(x => x.Name == param.Name);
                                 targetParams.Add(jProp.ToObject(param.ParameterType));
                             }
-                            //var param0 = methodParameters[0];
-                            //targetParams = new object[] { data.ToObject(param0.ParameterType) };
                         }
 
                         try
                         {
                             var task = (Task)method.Invoke(hub, targetParams?.ToArray());
 
-                            await task.ConfigureAwait(false);
-
-                            var resultProperty = task.GetType().GetProperty("Result");
-                            var response = resultProperty.GetValue(task);
-
-                            if (response != null)
+                            if (task != null)
                             {
-                                HubData immediateResponse = new HubData()
+                                await task.ConfigureAwait(false);
+
+                                var resultProperty = task.GetType().GetProperty("Result");
+                                var response = resultProperty.GetValue(task);
+
+                                if (response != null)
                                 {
-                                    Data = response,
-                                    MethodName = null,
-                                    PromiseId = requestHubData.PromiseId
-                                };
-                                
-                                await hubSocketEventArgs.HubSocket.SendData(immediateResponse);
+                                    HubData immediateResponse = new HubData()
+                                    {
+                                        Data = response,
+                                        MethodName = null,
+                                        PromiseId = requestHubData.PromiseId
+                                    };
+
+                                    await hubSocketEventArgs.HubSocket.SendData(immediateResponse);
+                                }
                             }
                         }
                         catch (Exception ex)

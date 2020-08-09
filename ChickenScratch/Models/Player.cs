@@ -6,5 +6,6 @@ namespace ChickenScratch.Models
     {
         public string Name { get; set; }
         public Guid ID { get; set; }
+        public Guid ConnectionId { get; set; }
     }
 }

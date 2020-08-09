@@ -15,7 +15,7 @@ namespace ChickenScratch.HubSockets
         public Guid ID { get; set; }
         public event EventHandler DataReceived;
 
-        private const int BufferSize = 4028;
+        private const int BufferSize = 16 * 1024;
         private WebSocket _socket;
         private readonly JsonSerializerSettings camelCaseJsonSerializerSettings = new JsonSerializerSettings()
         {
@@ -39,15 +39,24 @@ namespace ChickenScratch.HubSockets
 
         public async Task ListenLoop()
         {
-            var buffer = new byte[BufferSize];
-            var seg = new ArraySegment<byte>(buffer);
-
+            string fullMessage = string.Empty;
             while (true)
             {
-                await _socket.ReceiveAsync(seg, CancellationToken.None);
-                if (_socket.State != WebSocketState.Open)
+                var buffer = new byte[BufferSize];
+                var seg = new ArraySegment<byte>(buffer);
+
+                var result = await _socket.ReceiveAsync(seg, CancellationToken.None);
+
+                if (_socket.CloseStatus.HasValue || _socket.State != WebSocketState.Open)
                     break;
-                OnDataReceived(new HubSocketEventArgs() { Data = Encoding.UTF8.GetString(seg), HubSocket = this });
+
+                string bufferString = Encoding.UTF8.GetString(seg);
+                fullMessage += bufferString;
+                if (result.EndOfMessage)
+                {
+                    OnDataReceived(new HubSocketEventArgs() { Data = fullMessage, HubSocket = this });
+                    fullMessage = string.Empty;
+                }
             }
         }
 

@@ -12,9 +12,9 @@ namespace ChickenScratch.Hubs
             this.imageRepository = imageRepository ?? throw new System.ArgumentNullException(nameof(imageRepository));
         }
 
-        public async void Draw()
+        public async void Draw(string imageBase64)
         {
-            if (imageRepository.TryGet("test123", out string imageBase64))
+            //if (imageRepository.TryGet("test123", out string imageBase64))
             {
                 await Clients.SendAllExcept("Draw", Context.ConnectionId, imageBase64);
             }

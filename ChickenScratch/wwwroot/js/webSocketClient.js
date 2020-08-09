@@ -20,16 +20,22 @@ function toggleMyTurn() {
     myTurn = !myTurn;
 }
 
-function doConnect() {
+async function doConnect() {
     if (socket) {
         doDisconnect();
     }
 
     socket = new WebSocket(uri);
-    socket.onopen = function (e) { write("opened " + uri); };
     socket.onclose = function (e) { write("closed"); };
     socket.onmessage = onMessage;
-    socket.onerror = function (e) { write("Error: " + e.data); };
+
+    return new Promise((resolve, reject) => {
+        socket.onopen = () => {
+            write("opened - " + uri);
+            resolve();
+        };
+        socket.onerror = e => reject(e);
+    });
 }
 
 var hubMethods = [];
@@ -56,31 +62,34 @@ async function onMessage(e) {
         var hubMethod = hubMethods.find(x => x.methodName == hubData.methodName);
         if (hubMethod) {
             // console.log("Received message with no explicit client origin");
-            hubMethod.callback(hubData.data);
+            await hubMethod.callback(hubData.data);
             return;
         }
     }
 
-    console.log("Received data, but nothing is listening for it!");
+    console.log("Received data, but no method is registered to listen for it! MethodName: " + hubData.methodName);
+}
 
-    //// crap code here: -- this is just me testing stuff:
-    //if (false && !myTurn) {
-    //    var response = await fetch("api/image/", {
-    //        method: "GET"
-    //    });
-    //    var data = await response.text();
-    //    console.log(data);
+async function onDrawRequestReceived(base64) {
+    // crap code here: -- this is just me testing stuff:
+    if (!myTurn) {
+        //var response = await fetch("api/image/", {
+        //    method: "GET"
+        //});
+        //var data = await response.text();
+        //console.log(data);
 
-    //    var img = new Image();
-    //    img.onload = () => {
-    //        var canvas = document.getElementById("canvas");
-    //        var ctx = canvas.getContext("2d");
-    //        ctx.imageSmoothingEnabled = false;
-    //        ctx.drawImage(img, 0, 0);
-    //        console.log("DREW IMAGE!");
-    //    };
-    //    img.src = data;
-    //}
+        var data = base64;
+
+        var img = new Image();
+        img.onload = () => {
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0);
+        };
+        img.src = data;
+    }
 }
 
 function doDisconnect() {
@@ -89,25 +98,12 @@ function doDisconnect() {
 
 async function doSend() {
     var canvas = document.getElementById("canvas");
-
-    var canvasDataURL = canvas.toDataURL('image/jpeg', 0.3);
-
-    let data = { author: 'test', canvasBase64: canvasDataURL };
-
-    var response = await fetch("api/image/", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    });
-
-
-    console.log("Request complete!", response);
-
+    var canvasDataURL = canvas.toDataURL('image/jpeg', 0.6);
     let hubData = {
         methodName: "draw",
-        data: {}
+        data: {
+            imageBase64: canvasDataURL
+        }
     };
     write("Sending: " + JSON.stringify(hubData));
     socket.send(JSON.stringify(hubData));
@@ -148,24 +144,60 @@ async function createLobby() {
             lobbyName: "FirstLobby1"
         });
 
+        if (!response.isSuccess) {
+            throw response;
+        }
+
         console.log("LOBBY CREATION RESPONSE: ", response);
+        write("Lobby created: " + response.lobby.name);
     }
     catch (error) {
         console.log("lobby creation failed!");
+        write("Lobby creation failed:" + error.errorMessage);
     }
 }
 
 async function createPlayer() {
-    let hubData = {
-        methodName: "createLobby",
-        data: {
-            lobbyName: "FirstLobby1"
-        }
-    };
-    write("Sending: " + JSON.stringify(hubData));
-    var response = await socket.send(JSON.stringify(hubData));
+    console.log("starting request to create PLAYER");
 
-    console.log(response);
+    try {
+        var response = await sendWithPromise("createPlayer", {
+            playerName: "Player" + Math.round(1000 * Math.random())
+        });
+
+        if (!response.isSuccess) {
+            throw response;
+        }
+
+        console.log("Player creation success! Response: ", response);
+        write("Player created: " + response.player.name);
+    }
+    catch (error) {
+        console.log("PLAYER creation FAILED: ", error);
+        write("PLAYER creation failed:" + error.errorMessage);
+
+    }
+}
+
+async function joinLobby() {
+    var lobbyKeyInput = document.getElementById("lobby-key");
+    lobbyKey = lobbyKeyInput.value;
+
+    write("Joining lobby: " + lobbyKey);
+    try {
+        var response = await sendWithPromise("joinLobby", {
+            lobbyKey: lobbyKey
+        });
+
+        if (!response.isSuccess) {
+            throw response;
+        }
+
+        write("Successfully joined lobby: " + response.lobby.name);
+    }
+    catch (error) {
+        write("join lobby failed:" + error.errorMessage);
+    }
 }
 
 function draw() {
@@ -182,14 +214,14 @@ function draw() {
         }
     }
 
-    window.requestAnimationFrame(draw);
+    // window.requestAnimationFrame(draw);
 }
 
 function lobbyCreated(data) {
     console.log("Lobby created callback! Data: ", data);
 }
 
-function onInit() {
+async function onInit() {
     outputDiv = document.getElementById("output");
     var canvas = document.getElementById("canvas");
     canvas.width = 600;
@@ -204,7 +236,10 @@ function onInit() {
         ctx.beginPath();
         drawing = true
     });
-    canvas.addEventListener("mouseup", () => {
+    var stopDraw = () => {
+        if (!drawing)
+            return;
+
         drawing = false;
         // draw crap
         var canvas = document.getElementById("canvas");
@@ -214,22 +249,29 @@ function onInit() {
         if (myTurn) {
             doSend();
         }
-    });
+    };
+    window.addEventListener("mouseup", stopDraw);
+    //canvas.addEventListener("mouseout", stopDraw);
     canvas.addEventListener("mousemove", (e) => {
         oldMouseX = mouseX;
         oldMouseY = mouseY;
         mouseX = e.offsetX;
         mouseY = e.offsetY;
+
+        draw();
     });
 
 
     /// TESTING:
 
     RegisterClientMethod("LobbyCreated", lobbyCreated);
+    RegisterClientMethod("Draw", onDrawRequestReceived);
 
 
+    await doConnect();
+    await createPlayer();
 
-    draw();
+    //draw();
 }
 
 window.onload = onInit;

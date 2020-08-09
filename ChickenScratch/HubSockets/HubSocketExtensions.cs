@@ -1,6 +1,7 @@
 ﻿using ChickenScratch.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Reflection;
 
 namespace ChickenScratch.HubSockets
@@ -11,8 +12,14 @@ namespace ChickenScratch.HubSockets
         {
             socketAcceptor.RegisterHubTypes(assemblies);
 
+            var webSocketOptions = new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(60),
+                ReceiveBufferSize = 16 * 1024
+            };
+
             app.Map("/ws", a => {
-                a.UseWebSockets();
+                a.UseWebSockets(webSocketOptions);
                 a.Use(socketAcceptor.SocketAcceptor);
             });
         }
