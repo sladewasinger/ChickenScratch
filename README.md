@@ -2,7 +2,7 @@
 Like pictionary or skribbl.io, but higher player limits and less ads.
 
 ## SignalR-like technology
-I'm using web sockets and sort of re-creating SignalR's "hub" pattern to manage them. The true intent of this repo is to create and prototype an implementation of a decent dotnet core & JavaScript socket library. The server side is C#, and the client side is JavaScript. I've dubbed the web socket project code "HubSockets", and if all goes well I will separate the code out into its own repository.
+I'm using WebSockets and sort of re-creating SignalR's "hub" pattern to manage them. The true intent of this repo is to create and prototype an implementation of a decent, free dotnet core & JavaScript WebSocket library. The server side is C#, and the client side is JavaScript. I've dubbed the web socket project code "HubSockets", and if all goes well I will separate the code out into its own repository.
 
 ## Shared HTML 5 Canvas
 Right now you can open as many tabs as you want and connect them to the server. One person can draw in the canvas and the other people get updates after every mouse-up event from the person drawing. It's basically a real-time shared white-board, but it will turn into a game of pictionary once I am done.
