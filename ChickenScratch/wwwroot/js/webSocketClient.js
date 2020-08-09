@@ -201,8 +201,6 @@ async function joinLobby() {
 }
 
 function draw() {
-
-    // draw crap
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
@@ -213,8 +211,6 @@ function draw() {
             ctx.stroke();
         }
     }
-
-    // window.requestAnimationFrame(draw);
 }
 
 function lobbyCreated(data) {
@@ -241,7 +237,7 @@ async function onInit() {
             return;
 
         drawing = false;
-        // draw crap
+
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
         ctx.beginPath();
@@ -270,8 +266,6 @@ async function onInit() {
 
     await doConnect();
     await createPlayer();
-
-    //draw();
 }
 
 window.onload = onInit;

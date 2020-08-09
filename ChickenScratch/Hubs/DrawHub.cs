@@ -14,10 +14,7 @@ namespace ChickenScratch.Hubs
 
         public async void Draw(string imageBase64)
         {
-            //if (imageRepository.TryGet("test123", out string imageBase64))
-            {
                 await Clients.SendAllExcept("Draw", Context.ConnectionId, imageBase64);
-            }
         }
     }
 }
