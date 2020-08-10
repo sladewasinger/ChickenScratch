@@ -1,5 +1,5 @@
-﻿using ChickenScratch.HubSockets;
-using ChickenScratch.Repositories;
+﻿using ChickenScratch.Repositories;
+using HubSockets;
 
 namespace ChickenScratch.Hubs
 {

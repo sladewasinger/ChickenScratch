@@ -1,6 +1,6 @@
-﻿using ChickenScratch.HubSockets;
-using ChickenScratch.Models;
+﻿using ChickenScratch.Models;
 using ChickenScratch.Repositories;
+using HubSockets;
 using System;
 using System.Threading.Tasks;
 

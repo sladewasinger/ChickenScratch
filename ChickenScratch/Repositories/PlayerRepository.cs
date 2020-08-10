@@ -1,4 +1,5 @@
 ﻿using ChickenScratch.Models;
+using HubSockets;
 using System;
 using System.Linq;
 
