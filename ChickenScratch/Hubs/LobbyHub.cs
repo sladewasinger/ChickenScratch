@@ -74,7 +74,7 @@ namespace ChickenScratch.Hubs
 
             await Clients.SendToClients("PlayerJoinedLobby", lobby.Players
                 .Where(x => x.ConnectionId != Context.ConnectionId)
-                .Select(x => x.ConnectionId), lobby);
+                .Select(x => x.ConnectionId), player);
 
             return LobbyJoinResponse.Success(lobby);
         }

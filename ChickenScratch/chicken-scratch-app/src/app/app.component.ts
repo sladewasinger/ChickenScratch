@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Point } from 'src/app/models/point';
+import { HubSocketService } from 'src/app/services/hub-socket.service';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +8,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'chicken-scratch-app';
+
+  constructor() {
+  }
+
 }
