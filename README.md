@@ -8,8 +8,8 @@ I'm using WebSockets and sort of re-creating SignalR's "hub" pattern to manage t
 Right now you can open as many tabs as you want and connect them to the server. One person can draw in the canvas and the other people get updates after every mouse-up event from the person drawing. It's basically a real-time shared white-board, but it will turn into a game of pictionary once I am done.
 
 # Currently in-development (top priorities):
-* Move HubSocket code to its own repository and make it a GitHub Package (NuGet): https://github.com/features/packages
-* Implement newly created HubSocket GitHub package via NuGet - test everything.
+* ~~Move HubSocket code to its own repository and make it a GitHub Package (NuGet): https://github.com/features/packages~~
+* ~~Implement newly created HubSocket GitHub package via NuGet - test everything.~~
 * Switch the basic html client to an Angular client.
 * Add pre-lobby page where a player either creates a lobby or joins from a list of existing lobbies.
 * Add lobby-specific page where whiteboard is shown along with a list of players in the lobby.
