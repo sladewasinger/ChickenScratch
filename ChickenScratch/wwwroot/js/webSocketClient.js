@@ -105,7 +105,7 @@ async function doSend() {
             imageBase64: canvasDataURL
         }
     };
-    write("Sending: " + JSON.stringify(hubData));
+    write("sending drawing");
     socket.send(JSON.stringify(hubData));
 }
 
@@ -217,10 +217,18 @@ function lobbyCreated(data) {
     console.log("Lobby created callback! Data: ", data);
 }
 
+function getTouchPos(canvasDom, touchEvent) {
+    var rect = canvasDom.getBoundingClientRect();
+    return {
+        x: touchEvent.touches[0].clientX - rect.left,
+        y: touchEvent.touches[0].clientY - rect.top
+    };
+}
+
 async function onInit() {
     outputDiv = document.getElementById("output");
     var canvas = document.getElementById("canvas");
-    canvas.width = 600;
+    canvas.width = 500;
     canvas.height = 400;
 
     var ctx = canvas.getContext("2d");
@@ -228,10 +236,6 @@ async function onInit() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
 
-    canvas.addEventListener("mousedown", () => {
-        ctx.beginPath();
-        drawing = true
-    });
     var stopDraw = () => {
         if (!drawing)
             return;
@@ -246,16 +250,80 @@ async function onInit() {
             doSend();
         }
     };
-    window.addEventListener("mouseup", stopDraw);
-    //canvas.addEventListener("mouseout", stopDraw);
-    canvas.addEventListener("mousemove", (e) => {
+    var startDraw = () => {
+        ctx.beginPath();
+        drawing = true
+    };
+    var captureMousePos = (e) => {
         oldMouseX = mouseX;
         oldMouseY = mouseY;
         mouseX = e.offsetX;
         mouseY = e.offsetY;
 
         draw();
-    });
+    };
+    canvas.addEventListener("mousedown", startDraw);
+    window.addEventListener("mouseup", stopDraw);
+    //canvas.addEventListener("mouseout", stopDraw);
+    canvas.addEventListener("mousemove", captureMousePos);
+
+    // Set up touch events for mobile, etc
+    canvas.addEventListener("touchstart", function (e) {
+        var touch = e.touches[0];
+        var mouseEvent = new MouseEvent("mousedown", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+        e.preventDefault();
+    }, false);
+    canvas.addEventListener("touchend", function (e) {
+        var mouseEvent = new MouseEvent("mouseup", {});
+        canvas.dispatchEvent(mouseEvent);
+        window.dispatchEvent(mouseEvent);
+        e.preventDefault();
+    }, false);
+    canvas.addEventListener("touchmove", function (e) {
+        var touch = e.touches[0];
+        var mouseEvent = new MouseEvent( // create event
+            'mousemove',   // type of event
+            {
+                'view': event.target.ownerDocument.defaultView,
+                'bubbles': true,
+                'cancelable': true,
+                'screenX': touch.screenX,  // get the touch coords 
+                'screenY': touch.screenY,  // and add them to the 
+                'clientX': touch.clientX,  // mouse event
+                'clientY': touch.clientY,
+                'offsetX': touch.clientX,
+                'offsetY': touch.clientY
+            });
+        // send it to the same target as the touch event contact point.
+        touch.target.dispatchEvent(mouseEvent);
+        e.preventDefault();
+    }, false);
+
+
+    // page tweaks:
+    canvas.onselectstart = () => false;
+    //canvas.addEventListener("touchstart", function (e) {
+    //    if (e.target == canvas) {
+    //        e.preventDefault();
+    //    }
+    //}, false);
+    //canvas.addEventListener("touchend", function (e) {
+    //    if (e.target == canvas) {
+    //        e.preventDefault();
+    //    }
+    //}, false);
+    //canvas.addEventListener("touchmove", function (e) {
+    //    if (e.target == canvas) {
+    //        e.preventDefault();
+    //    }
+    //}, false);
+
+    
+
 
 
     /// TESTING:
