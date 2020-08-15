@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using ChickenScratch.Hubs;
 using ChickenScratch.Repositories;
 using HubSockets;
+using ChickenScratch.Services;
 
 namespace ChickenScratch
 {
@@ -27,6 +28,7 @@ namespace ChickenScratch
             services.AddHub<DrawHub>();
             services.AddHub<LobbyHub>();
             services.AddHub<PlayerHub>();
+            services.AddSingleton<LobbyStateManager>();
             services.RegisterHubSockets();
         }
 

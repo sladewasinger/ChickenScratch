@@ -1,26 +1,30 @@
 ﻿namespace ChickenScratch.Models
 {
-    public class LobbyCreateHubResponse
+    public class HubResponse
     {
         public bool IsSuccess { get; set; }
         public string ErrorMessage { get; set; }
-        public Lobby Lobby { get; set; }
 
-        public static LobbyCreateHubResponse Error(string errorMsg)
+        public static HubResponse Error(string errorMsg)
         {
-            return new LobbyCreateHubResponse()
+            return new HubResponse()
             {
                 IsSuccess = false,
                 ErrorMessage = errorMsg
             };
         }
+    }
 
-        public static LobbyCreateHubResponse Success(Lobby lobby)
+    public class HubResponse<T> : HubResponse
+    {
+        public T Data { get; set; }
+
+        public static HubResponse<T> Success(T data)
         {
-            return new LobbyCreateHubResponse()
+            return new HubResponse<T>()
             {
                 IsSuccess = true,
-                Lobby = lobby
+                Data = data
             };
         }
     }

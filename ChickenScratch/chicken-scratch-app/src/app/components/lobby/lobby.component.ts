@@ -1,16 +1,22 @@
-import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { HubSocketService } from 'src/app/services/hub-socket.service';
+import { LobbyStateService } from 'src/app/services/lobby-state.service';
+
 import { Point } from 'src/app/models/point';
 import { Player } from 'src/app/models/player';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
+import { Lobby } from 'src/app/models/lobby';
+import { LobbyState } from 'src/app/models/lobbyState';
+import { Observable, Subscription } from 'rxjs';
+import { first, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss']
 })
-export class LobbyComponent implements OnInit {
+export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   drawing = false;
   canvas: HTMLCanvasElement;
   outputDiv: HTMLElement;
@@ -18,20 +24,54 @@ export class LobbyComponent implements OnInit {
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
   uri = "wss://" + window.location.hostname + ":5001/ws";
-  lobbyKey: string;
 
-  players: Player[] = [{ name: 'test', connectionId: '', id: '1' }];
-  text: string = 't';
+  subs: Subscription[] = [];
+
+  lobbyState: LobbyState;
+  lobby: Lobby;
+  players: Player[];
 
   constructor(private hubSocketService: HubSocketService,
+    private lobbyStateService: LobbyStateService,
     private activatedRoute: ActivatedRoute,
-    private changeDetector: ChangeDetectorRef) {
+    private changeDetector: ChangeDetectorRef,
+    private router: Router) {
+  }
+
+  async ngOnDestroy() {
+    this.subs.forEach(x => x.unsubscribe());
   }
 
   async ngOnInit() {
-    console.log("STATE: ", window.history.state);
-    this.lobbyKey = window.history.state.lobbyKey;
+    // if (!await this.lobbyStateService.getLobbyState().pipe(first()).toPromise()) {
+    //   this.router.navigate(['/']);
+    // }
 
+    /// TESTING:
+    //this.hubSocketService.RegisterClientMethod("Draw", (e) => this.onDrawRequestReceived(e));
+    //this.hubSocketService.RegisterClientMethod("PlayerJoinedLobby", (e) => this.playerJoined(e));
+
+    this.subs.push(
+      this.lobbyStateService.getLobbyState().subscribe(l => {
+        this.lobbyState = l;
+        this.lobby = this.lobbyState.lobbies
+          .find(l => l.players.some(p => p.connectionId == this.hubSocketService.ConnectionId));
+        this.players = this.lobby.players;
+        this.changeDetector.detectChanges();
+        console.log(l);
+      })
+    );
+
+    // this.subs.push(this.hubSocketService.listenOn<LobbyState>("PlayerJoinedLobby").subscribe(x => {
+    //   this.playerJoined(x);
+    // }));
+
+    // this.subs.push(this.hubSocketService.listenOn<LobbyState>("PlayerLeft").subscribe(x => {
+    //   this.playerLeft(x);
+    // }));
+  }
+
+  ngAfterViewInit() {
     this.outputDiv = document.getElementById("output");
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     this.canvas.width = 500;
@@ -86,23 +126,18 @@ export class LobbyComponent implements OnInit {
 
     // page tweaks:
     this.canvas.onselectstart = () => false;
-
-    /// TESTING:
-    //this.hubSocketService.RegisterClientMethod("Draw", (e) => this.onDrawRequestReceived(e));
-    //this.hubSocketService.RegisterClientMethod("PlayerJoinedLobby", (e) => this.playerJoined(e));
-
-    this.hubSocketService.listenOn<Player>("PlayerJoinedLobby").subscribe(x => {
-      console.log("PLAYER JOINED");
-      this.playerJoined(x);
-    });
   }
 
-  public playerJoined(e) {
-    console.log("player joined", e);
-    this.text = e.name;
-    this.players.push(e);
-    this.changeDetector.detectChanges();
-  }
+  // public playerJoined(e: LobbyState) {
+  //   console.log("player joined", e);
+  //   this.lobbyStateService.updateLobbyState(e);
+  // }
+
+  // public playerLeft(e: LobbyState) {
+  //   console.log("Player left!", e);
+  //   this.lobbyStateService.updateLobbyState(e);
+  //   this.changeDetector.detectChanges();
+  // }
 
   trackPlayer(index, player: Player) {
     return player ? player.id : undefined;

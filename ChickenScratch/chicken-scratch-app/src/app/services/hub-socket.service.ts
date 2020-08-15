@@ -12,6 +12,8 @@ export class HubSocketService {
   // hubMethods = [];
   promiseIdCounter = 0;
 
+  public ConnectionId: string;
+
   private hubMessageStream = new Subject<any>();
 
   listenOn<T>(methodName: string): Observable<T> {
@@ -49,7 +51,7 @@ export class HubSocketService {
   //   this.hubMethods.push({ methodName: methodName, callback: callback });
   // }
 
-  async sendWithPromise<T extends HubResponse>(methodName, data): Promise<T> {
+  async sendWithPromise<T>(methodName, data): Promise<T> {
     let hubData = {
       methodName: methodName,
       data: data,
@@ -94,17 +96,23 @@ export class HubSocketService {
       console.log("Received corrupted hub data: ", e.data);
     }
 
+    if (hubData && hubData.methodName === "HubSocketConnected") {
+      this.ConnectionId = hubData.data;
+      console.log("ConnectionId: ", this.ConnectionId);
+      return;
+    }
+
     if (hubData.promiseId != undefined && hubData.promiseId != -1) {
       var promise = this.requestPromises.find(x => x.promiseId == hubData.promiseId);
       if (promise) {
-        // console.log("Received Immediate Callback response! PromiseId: ", hubData.promiseId);
+        //console.log("Received Immediate Callback response! PromiseId: ", hubData.promiseId);
         promise.resolve(hubData.data);
         return;
       }
     } else {
       //var hubMethod = this.hubMethods.find(x => x.methodName == hubData.methodName);
       //if (hubMethod) {
-      // console.log("Received message with no explicit client origin");
+      console.log("Received message with no explicit client origin", hubData);
       //await hubMethod.callback(hubData.data);
       this.hubMessageStream.next(hubData);
       return;
