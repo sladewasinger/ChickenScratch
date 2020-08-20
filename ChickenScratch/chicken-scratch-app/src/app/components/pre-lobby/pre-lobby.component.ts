@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { LobbyState } from 'src/app/models/lobbyState';
+import { Player } from 'src/app/models/player';
 
 @Component({
   selector: 'app-pre-lobby',
@@ -32,7 +33,7 @@ export class PreLobbyComponent implements OnInit {
     console.log("starting request to create PLAYER");
 
     try {
-      var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("createPlayer", {
+      var response = await this.hubSocketService.sendWithPromise<HubResponse<Player>>("createPlayer", {
         playerName: "Player" + Math.round(1000 * Math.random())
       });
 
@@ -40,6 +41,7 @@ export class PreLobbyComponent implements OnInit {
         throw response;
       }
 
+      this.lobbyStateService.updateMyPlayer(response.data);
       console.log("Player creation success! Response: ", response);
       //this.lobbyStateService.updateLobbyState(response.data);
     }

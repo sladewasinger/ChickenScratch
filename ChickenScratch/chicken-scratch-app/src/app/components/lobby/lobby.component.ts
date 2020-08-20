@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { Lobby } from 'src/app/models/lobby';
 import { LobbyState } from 'src/app/models/lobbyState';
+import { GameState } from 'src/app/models/gameState';
 import { Observable, Subscription } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
@@ -20,7 +21,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   drawing = false;
   canvas: HTMLCanvasElement;
   outputDiv: HTMLElement;
-  myTurn = false;
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
   uri = "wss://" + window.location.hostname + ":5001/ws";
@@ -28,8 +28,21 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   subs: Subscription[] = [];
 
   lobbyState: LobbyState;
-  lobby: Lobby;
-  players: Player[];
+  myPlayer: Player;
+  gameState: GameState;
+
+  get lobby(): Lobby {
+    return this.lobbyState?.lobbies
+      .find(l => l.players.some(p => p.connectionId == this.hubSocketService.ConnectionId));
+  }
+
+  get players(): Player[] {
+    return this.lobby?.players;
+  }
+
+  get myTurn(): boolean {
+    return this.gameState?.activePlayer.id == this.myPlayer?.id;
+  }
 
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
@@ -46,11 +59,26 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subs.push(
       this.lobbyStateService.getLobbyState().subscribe(l => {
         this.lobbyState = l;
-        this.lobby = this.lobbyState.lobbies
-          .find(l => l.players.some(p => p.connectionId == this.hubSocketService.ConnectionId));
-        this.players = this.lobby.players;
-        this.changeDetector.detectChanges();
-        console.log(l);
+      })
+    );
+
+    this.subs.push(
+      this.hubSocketService.listenOn<string>("Draw").subscribe(x => {
+        console.log("Received base64: ", x);
+        this.onDrawRequestReceived(x);
+      })
+    );
+
+    this.subs.push(
+      this.lobbyStateService.getMyPlayer().subscribe(p => {
+        this.myPlayer = p;
+      })
+    );
+
+    this.subs.push(
+      this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
+        console.log("Game State Update: ", x);
+        this.gameState = x;
       })
     );
   }
@@ -112,12 +140,15 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvas.onselectstart = () => false;
   }
 
-  trackPlayer(index, player: Player) {
-    return player ? player.id : undefined;
+
+  async startGame() {
+    console.log("starting game..");
+    var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
+    console.log("start game result: ", result);
   }
 
-  public toggleMyTurn() {
-    this.myTurn = !this.myTurn;
+  trackPlayer(index, player: Player) {
+    return player ? player.id : undefined;
   }
 
   async onDrawRequestReceived(base64) {

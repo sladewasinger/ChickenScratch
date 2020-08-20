@@ -5,4 +5,5 @@ export interface Lobby {
     key: string;
     name: string;
     players: Player[];
+    lobbyLeader: Player;
 }
