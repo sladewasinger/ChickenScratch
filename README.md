@@ -15,3 +15,5 @@ Right now you can open as many tabs as you want and connect them to the server. 
 * Add lobby-specific page where whiteboard is shown along with a list of players in the lobby.
 * Add more colors/brush sizes to whiteboard.
 * Change frequency of client canvas updates to be more often (not just upon artist's mouse-up event).
+* Add actual game logic - ie player points, guessing the word, etc.
+* Add levenshtein distance algorithm for determing how close a typed guess is to the word.
