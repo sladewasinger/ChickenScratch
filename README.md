@@ -10,8 +10,10 @@ Right now you can open as many tabs as you want and connect them to the server. 
 # Currently in-development (top priorities):
 * ~~Move HubSocket code to its own repository and make it a GitHub Package (NuGet): https://github.com/features/packages~~
 * ~~Implement newly created HubSocket GitHub package via NuGet - test everything.~~
-* Switch the basic html client to an Angular client.
-* Add pre-lobby page where a player either creates a lobby or joins from a list of existing lobbies.
+* ~~Switch the basic html client to an Angular client.~~
+* ~~Add pre-lobby page where a player either creates a lobby or joins from a list of existing lobbies.~~
 * Add lobby-specific page where whiteboard is shown along with a list of players in the lobby.
 * Add more colors/brush sizes to whiteboard.
 * Change frequency of client canvas updates to be more often (not just upon artist's mouse-up event).
+* Add actual game logic - ie player points, guessing the word, etc.
+* Add levenshtein distance algorithm for determing how close a typed guess is to the word.
