@@ -43,14 +43,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // if (!await this.lobbyStateService.getLobbyState().pipe(first()).toPromise()) {
-    //   this.router.navigate(['/']);
-    // }
-
-    /// TESTING:
-    //this.hubSocketService.RegisterClientMethod("Draw", (e) => this.onDrawRequestReceived(e));
-    //this.hubSocketService.RegisterClientMethod("PlayerJoinedLobby", (e) => this.playerJoined(e));
-
     this.subs.push(
       this.lobbyStateService.getLobbyState().subscribe(l => {
         this.lobbyState = l;
@@ -61,14 +53,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log(l);
       })
     );
-
-    // this.subs.push(this.hubSocketService.listenOn<LobbyState>("PlayerJoinedLobby").subscribe(x => {
-    //   this.playerJoined(x);
-    // }));
-
-    // this.subs.push(this.hubSocketService.listenOn<LobbyState>("PlayerLeft").subscribe(x => {
-    //   this.playerLeft(x);
-    // }));
   }
 
   ngAfterViewInit() {
@@ -127,17 +111,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     // page tweaks:
     this.canvas.onselectstart = () => false;
   }
-
-  // public playerJoined(e: LobbyState) {
-  //   console.log("player joined", e);
-  //   this.lobbyStateService.updateLobbyState(e);
-  // }
-
-  // public playerLeft(e: LobbyState) {
-  //   console.log("Player left!", e);
-  //   this.lobbyStateService.updateLobbyState(e);
-  //   this.changeDetector.detectChanges();
-  // }
 
   trackPlayer(index, player: Player) {
     return player ? player.id : undefined;

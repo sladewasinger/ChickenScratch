@@ -16,6 +16,10 @@ export class HubSocketService {
 
   private hubMessageStream = new Subject<any>();
 
+  get Connected(): boolean {
+    return !!this.ConnectionId;
+  }
+
   listenOn<T>(methodName: string): Observable<T> {
     return this.hubMessageStream.asObservable().pipe(
       filter(x => x.methodName == methodName),
