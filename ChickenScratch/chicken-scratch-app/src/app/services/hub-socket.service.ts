@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HubResponse } from 'src/app/models/hubResponse';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, ReplaySubject } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 @Injectable({
@@ -14,7 +14,7 @@ export class HubSocketService {
 
   public ConnectionId: string;
 
-  private hubMessageStream = new Subject<any>();
+  private hubMessageStream = new ReplaySubject<any>(1);
 
   get Connected(): boolean {
     return !!this.ConnectionId;
@@ -55,7 +55,7 @@ export class HubSocketService {
   //   this.hubMethods.push({ methodName: methodName, callback: callback });
   // }
 
-  async sendWithPromise<T>(methodName, data): Promise<T> {
+  async sendWithPromise<T>(methodName: string, data: any | undefined): Promise<T> {
     let hubData = {
       methodName: methodName,
       data: data,

@@ -17,13 +17,12 @@ import { first, take } from 'rxjs/operators';
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss']
 })
-export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
+export class LobbyComponent implements OnInit, OnDestroy {
   drawing = false;
   canvas: HTMLCanvasElement;
   outputDiv: HTMLElement;
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
-  uri = "wss://" + window.location.hostname + ":5001/ws";
 
   subs: Subscription[] = [];
 
@@ -46,8 +45,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
-    private activatedRoute: ActivatedRoute,
-    private changeDetector: ChangeDetectorRef,
     private router: Router) {
   }
 
@@ -63,169 +60,19 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.subs.push(
-      this.hubSocketService.listenOn<string>("Draw").subscribe(x => {
-        console.log("Received base64: ", x);
-        this.onDrawRequestReceived(x);
-      })
-    );
-
-    this.subs.push(
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
       })
     );
-
-    this.subs.push(
-      this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
-        console.log("Game State Update: ", x);
-        this.gameState = x;
-      })
-    );
   }
-
-  ngAfterViewInit() {
-    this.outputDiv = document.getElementById("output");
-    this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    this.canvas.width = 500;
-    this.canvas.height = 400;
-
-    var ctx = this.canvas.getContext("2d");
-    ctx.fillStyle = "rgb(255,255,255)";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.imageSmoothingEnabled = false;
-
-    this.canvas.addEventListener("mousedown", this.startDraw.bind(this));
-    window.addEventListener("mouseup", this.stopDraw.bind(this));
-    //canvas.addEventListener("mouseout", stopDraw);
-    this.canvas.addEventListener("mousemove", this.captureMousePos.bind(this));
-
-    // Set up touch events for mobile, etc
-    this.canvas.addEventListener("touchstart", (e) => {
-      var touch = e.touches[0];
-      var mouseEvent = new MouseEvent("mousedown", {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      this.canvas.dispatchEvent(mouseEvent);
-      e.preventDefault();
-    }, false);
-    this.canvas.addEventListener("touchend", (e) => {
-      var mouseEvent = new MouseEvent("mouseup", {});
-      this.canvas.dispatchEvent(mouseEvent);
-      window.dispatchEvent(mouseEvent);
-      e.preventDefault();
-    }, false);
-    this.canvas.addEventListener("touchmove", (e) => {
-      var touch = e.touches[0];
-      var mouseEvent = new MouseEvent( // create event
-        'mousemove',   // type of event
-        {
-          'view': (event.target as any).ownerDocument.defaultView,
-          'bubbles': true,
-          'cancelable': true,
-          'screenX': touch.screenX,  // get the touch coords 
-          'screenY': touch.screenY,  // and add them to the 
-          'clientX': touch.clientX,  // mouse event
-          'clientY': touch.clientY
-          // 'offsetX': touch.clientX,
-          // 'offsetY': touch.clientY
-        });
-      // send it to the same target as the touch event contact point.
-      touch.target.dispatchEvent(mouseEvent);
-      e.preventDefault();
-    }, false);
-
-
-    // page tweaks:
-    this.canvas.onselectstart = () => false;
-  }
-
 
   async startGame() {
-    console.log("starting game..");
-    var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
-    console.log("start game result: ", result);
-  }
-
-  trackPlayer(index, player: Player) {
-    return player ? player.id : undefined;
-  }
-
-  async onDrawRequestReceived(base64) {
-    if (!this.myTurn) {
-      var data = base64;
-
-      var img = new Image();
-      img.onload = () => {
-        var ctx = this.canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, 0, 0);
-      };
-      img.src = data;
+    try {
+      var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
+      ///this.router.navigate(['lobby-game']);
     }
-  }
-
-  getTouchPos(canvasDom, touchEvent) {
-    var rect = canvasDom.getBoundingClientRect();
-    return {
-      x: touchEvent.touches[0].clientX - rect.left,
-      y: touchEvent.touches[0].clientY - rect.top
-    };
-  }
-
-  draw() {
-    var ctx = this.canvas.getContext("2d");
-
-    if (this.myTurn) {
-      if (this.drawing) {
-        ctx.lineTo(this.mousePos.x, this.mousePos.y);
-        ctx.stroke();
-      }
+    catch (error) {
+      console.log("ERROR starting game!", error);
     }
-  }
-
-  captureMousePos(e: MouseEvent) {
-    this.oldMousePos.x = this.mousePos.x;
-    this.oldMousePos.y = this.mousePos.y;
-    this.mousePos.x = e.offsetX;
-    this.mousePos.y = e.offsetY;
-
-    this.draw();
-  }
-
-  startDraw() {
-    var ctx = this.canvas.getContext("2d");
-    ctx.beginPath();
-    this.drawing = true
-  }
-
-  stopDraw() {
-    if (!this.drawing)
-      return;
-
-    this.drawing = false;
-    var ctx = this.canvas.getContext("2d");
-    ctx.beginPath();
-
-    if (this.myTurn) {
-      this.doSend();
-    }
-  }
-
-  doSend() {
-    var canvas = document.getElementById("canvas");
-    var canvasDataURL = this.canvas.toDataURL('image/jpeg', 0.6);
-    let data = {
-      imageBase64: canvasDataURL
-    };
-    this.write("sending drawing");
-    this.hubSocketService.send('draw', data);
-  }
-
-  write(s) {
-    var p = document.createElement("p");
-    p.innerHTML = s;
-    this.outputDiv.appendChild(p);
-    this.outputDiv.scrollTop = this.outputDiv.scrollHeight;
   }
 }

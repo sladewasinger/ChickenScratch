@@ -1,0 +1,16 @@
+<h1>Chicken Scratch</h1>
+
+<h3 *ngIf="!lobby">NO LOBBY</h3>
+<div *ngIf="lobbyState && lobby && myPlayer">
+    <h3>Lobby: {{ lobby.key }}</h3>
+    <div style="width: 100vw; text-align: center">
+        <ol>
+            <li *ngFor="let player of players">{{ player.name }}</li>
+        </ol>
+    </div>
+</div>
+<div style="width: 100vw;">
+    <b *ngIf="myTurn">WORD: '{{ gameState.currentWord }}'. YOUR TURN! DRAW IN THE BLUE BOX BELOW!</b>
+    <canvas id="canvas"></canvas>
+    <div id="output"></div>
+</div>

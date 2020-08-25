@@ -18,20 +18,12 @@ export class PreLobbyComponent implements OnInit {
     private router: Router) { }
 
   async ngOnInit() {
-    //this.hubSocketService.RegisterClientMethod("LobbyCreated", this.lobbyCreated.bind(this));
 
     await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":5001/ws");
     await this.createPlayer();
   }
 
-  // lobbyCreated(data: LobbyState) {
-  //   console.log("Lobby created callback! Data: ", data);
-  //   this.lobbyStateService.updateLobbyState(data);
-  // }
-
   async createPlayer() {
-    console.log("starting request to create PLAYER");
-
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<Player>>("createPlayer", {
         playerName: "Player" + Math.round(1000 * Math.random())
@@ -42,8 +34,6 @@ export class PreLobbyComponent implements OnInit {
       }
 
       this.lobbyStateService.updateMyPlayer(response.data);
-      console.log("Player creation success! Response: ", response);
-      //this.lobbyStateService.updateLobbyState(response.data);
     }
     catch (error) {
       console.log("PLAYER creation FAILED: ", error);
@@ -51,8 +41,6 @@ export class PreLobbyComponent implements OnInit {
   }
 
   async createLobby() {
-    console.log("starting request to create lobby");
-
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("createLobby", {
         lobbyName: "FirstLobby1"
@@ -62,8 +50,6 @@ export class PreLobbyComponent implements OnInit {
         throw response;
       }
 
-      console.log("LOBBY CREATION RESPONSE: ", response);
-      //this.lobbyStateService.updateLobbyState(response.data);
       this.router.navigate(['lobby']);
     }
     catch (error) {
@@ -84,8 +70,6 @@ export class PreLobbyComponent implements OnInit {
         throw response;
       }
 
-      console.log("Lobby joined! ", response);
-      //this.lobbyStateService.updateLobbyState(response.data);
       this.router.navigate(['lobby']);
     }
     catch (error) {

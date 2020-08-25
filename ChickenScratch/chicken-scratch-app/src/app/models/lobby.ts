@@ -6,4 +6,5 @@ export interface Lobby {
     name: string;
     players: Player[];
     lobbyLeader: Player;
+    gameRunning: boolean;
 }
