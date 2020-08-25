@@ -1,7 +1,57 @@
-<p>Join a lobby below:</p>
-
-<div style="width: 100vw; text-align: center">
-    <input type="text" id="lobby-key">
-    <button id="start" (click)="joinLobby()">join lobby</button>
-    <button id="test" (click)="createLobby()">Create Lobby</button>
+<div class="container" *ngIf="!connected">
+    <div class="row" *ngIf="!myPlayer">
+        <div class="col-sm">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">WAITING ON SERVER CONNECTION...</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" *ngIf="connected">
+    <div class="row" *ngIf="!myPlayer">
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Player</h5>
+                    <form [formGroup]="playerForm" (ngSubmit)="playerFormSubmit()" autocomplete="off">
+                        <div class="form-group">
+                            <label for="playerName">Username:</label>
+                            <input type="text" class="form-control" id="playerName" formControlName="playerName"
+                                placeholder="Enter username" required>
+                            <div class="valid-tooltip">
+                                Looks good!
+                            </div>
+                            <div class="invalid-tooltip">
+                                Please choose a unique and valid username.
+                            </div>
+                            <div *ngIf="playerName.invalid && (playerName.dirty || playerName.touched)"
+                                class="alert alert-danger">
+                                <div *ngIf="playerName.errors.minlength || playerName.errors.required">
+                                    Name is required
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">JOIN</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" *ngIf="myPlayer">
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lobby</h5>
+                    <div>
+                        <p>Join a lobby below:</p>
+                        <input type="text" id="lobby-key" placeholder="existing lobby id">
+                        <button id="start" (click)="joinLobby()">join lobby</button>
+                    </div>
+                    <div>
+                        <button id="test" (click)="createLobby()">Create Lobby</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

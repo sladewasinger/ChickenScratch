@@ -5,6 +5,8 @@ import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { LobbyState } from 'src/app/models/lobbyState';
 import { Player } from 'src/app/models/player';
+import { FormGroup, FormBuilder, NgForm, FormControl, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pre-lobby',
@@ -12,21 +14,69 @@ import { Player } from 'src/app/models/player';
   styleUrls: ['./pre-lobby.component.scss']
 })
 export class PreLobbyComponent implements OnInit {
+  playerForm: FormGroup;
+  subs: Subscription[] = [];
+  myPlayer: Player;
 
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
-    private router: Router) { }
+    private router: Router,
+    private formBuilder: FormBuilder) { }
+
+  get playerName() {
+    return this.playerForm.get('playerName');
+  }
+
+  async ngOnDestroy() {
+    this.subs.forEach(x => x.unsubscribe());
+  }
 
   async ngOnInit() {
+    this.subs.push(
+      this.lobbyStateService.getMyPlayer().subscribe(p => {
+        this.myPlayer = p;
+      })
+    );
 
-    await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":5001/ws");
+    this.playerForm = this.formBuilder.group({
+      playerName: new FormControl('', [Validators.required, Validators.minLength(1)])
+    });
+
+    console.log("ngoninit");
+    this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x));
+    await this.tryConnect();
+  }
+
+  async tryConnect() {
+    console.log("attempting connect");
+    try {
+      await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":5001/ws");
+    } catch (error) {
+      console.log("ERROR connecting to hub socket service: ", error);
+    }
+  }
+
+  get connected() {
+    return this.hubSocketService.Connected;
+  }
+
+  async onDisconnect(x) {
+    console.log("ondisccddf");
+    await this.tryConnect();
+  }
+
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async playerFormSubmit() {
     await this.createPlayer();
   }
 
   async createPlayer() {
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<Player>>("createPlayer", {
-        playerName: "Player" + Math.round(1000 * Math.random())
+        playerName: this.playerName.value
       });
 
       if (!response.isSuccess) {

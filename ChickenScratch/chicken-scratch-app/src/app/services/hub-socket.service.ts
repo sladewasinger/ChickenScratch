@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { Observable, Subject, ReplaySubject } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +10,13 @@ import { map, filter } from 'rxjs/operators';
 export class HubSocketService {
   socket: WebSocket;
   requestPromises = [];
-  // hubMethods = [];
   promiseIdCounter = 0;
 
   public ConnectionId: string;
 
   private hubMessageStream = new ReplaySubject<any>(1);
+
+  private disconnectStream = new Subject();
 
   get Connected(): boolean {
     return !!this.ConnectionId;
@@ -27,7 +29,11 @@ export class HubSocketService {
     );
   }
 
-  constructor() {
+  constructor(private router: Router) {
+  }
+
+  onDisconnect(): Observable<any> {
+    return this.disconnectStream.asObservable();
   }
 
   doDisconnect() {
@@ -36,19 +42,34 @@ export class HubSocketService {
 
   async doConnect(uri: string) {
     if (this.socket) {
-      this.doDisconnect();
+      console.log("ALREADY CONNECTED - ABORTING");
+      return new Promise((resolve, reject) => reject());
     }
 
     this.socket = new WebSocket(uri);
-    this.socket.onclose = () => console.log("socket closed");
+    this.socket.onclose = (e) => this.onClose(e);
     this.socket.onmessage = (e) => this.onMessage(e);
 
     return new Promise((resolve, reject) => {
       this.socket.onopen = () => {
         resolve();
       };
-      this.socket.onerror = e => reject(e);
+      this.socket.onerror = e => {
+        this.cleanupSocket();
+        reject(e);
+      }
     });
+  }
+
+  onClose(e) {
+    console.log("Socket closed: ", e);
+    this.cleanupSocket();
+    this.disconnectStream.next(e);
+  }
+
+  private cleanupSocket() {
+    this.ConnectionId = null;
+    this.socket = null;
   }
 
   // RegisterClientMethod(methodName, callback) {

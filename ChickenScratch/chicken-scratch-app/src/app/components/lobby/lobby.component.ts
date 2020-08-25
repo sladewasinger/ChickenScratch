@@ -69,6 +69,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   async startGame() {
     try {
       var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
+      this.gameState = result;
       ///this.router.navigate(['lobby-game']);
     }
     catch (error) {
