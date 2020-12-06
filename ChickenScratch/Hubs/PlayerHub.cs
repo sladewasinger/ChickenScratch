@@ -36,7 +36,7 @@ namespace ChickenScratch.Hubs
             playerRepository.AddOrUpdate(player.ID, player);
 
             await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
-            return HubResponse<LobbyState>.Success(lobbyStateManager.GetState());
+            return HubResponse<Player>.Success(player);
         }
 
         public async override void OnDisconnectedAsync()

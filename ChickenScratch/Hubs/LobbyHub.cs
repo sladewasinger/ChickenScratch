@@ -95,6 +95,12 @@ namespace ChickenScratch.Hubs
                 {
                     lobbyRepository.AddOrUpdate(lobbyContainingPlayer.ID, lobbyContainingPlayer);
                 }
+
+                var gamePlayer = lobbyContainingPlayer.Engine?.GetGamePlayer(player);
+                if (gamePlayer != null)
+                {
+                    lobbyContainingPlayer.Engine.PlayerLeft(lobbyContainingPlayer.Engine.GetGamePlayer(player));
+                }
                 await Clients.SendAllExcept("LobbyStateUpdated", Context.ConnectionId, lobbyStateManager.GetState());
             }
             base.OnDisconnectedAsync();

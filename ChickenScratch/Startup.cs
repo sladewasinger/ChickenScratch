@@ -28,6 +28,7 @@ namespace ChickenScratch
             services.AddHub<DrawHub>();
             services.AddHub<LobbyHub>();
             services.AddHub<PlayerHub>();
+            services.AddHub<GameHub>();
             services.AddSingleton<LobbyStateManager>();
             services.RegisterHubSockets();
         }
