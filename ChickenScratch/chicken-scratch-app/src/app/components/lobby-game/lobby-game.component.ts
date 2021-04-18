@@ -38,7 +38,7 @@ export class LobbyGameComponent implements OnInit {
   }
 
   get myTurn(): boolean {
-    return this.gameState?.activePlayer.id == this.myPlayer?.id;
+    return this.gameState?.activePlayer?.id == this.myPlayer?.id;
   }
 
   constructor(private hubSocketService: HubSocketService,

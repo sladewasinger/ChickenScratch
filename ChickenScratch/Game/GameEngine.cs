@@ -106,7 +106,7 @@ namespace ChickenScratch.Game
 
         public GameState GetGameStateForPlayer(GamePlayer gamePlayer)
         {
-            if (gameState.Players.Any())
+            if (!gameState.Players.Any())
             {
                 return new GameState();
             }

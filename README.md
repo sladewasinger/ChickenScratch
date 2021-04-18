@@ -17,3 +17,13 @@ Right now you can open as many tabs as you want and connect them to the server. 
 * Change frequency of client canvas updates to be more often (not just upon artist's mouse-up event).
 * Add actual game logic - ie player points, guessing the word, etc.
 * Add levenshtein distance algorithm for determing how close a typed guess is to the word.
+
+# How to Run:
+* Make sure you have the sladewasinger/HubSockets repo cloned in the same parent folder as this one.
+* Follow these instructions for SSL cert setup: https://medium.com/@rubenvermeulen/running-angular-cli-over-https-with-a-trusted-certificate-4a0d5f92747a
+* In the commandline, from the project directory, run:  
+  * ```dotnet restore```  
+  * ```dotnet run```
+* From the chicken-scratch-app folder:  
+  * ```npm run start```  
+* Navigate to https://localhost:4201

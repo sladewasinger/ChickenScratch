@@ -50,12 +50,13 @@ export class HubSocketService {
     this.socket.onclose = (e) => this.onClose(e);
     this.socket.onmessage = (e) => this.onMessage(e);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.socket.onopen = () => {
         resolve();
       };
       this.socket.onerror = e => {
         this.cleanupSocket();
+        console.log(e);
         reject(e);
       }
     });
