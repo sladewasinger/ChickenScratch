@@ -14,7 +14,15 @@ namespace ChickenScratch.Hubs
 
         public async void Draw(string imageBase64)
         {
-                await Clients.SendAllExcept("Draw", Context.ConnectionId, imageBase64);
+            // await Clients.SendAllExcept("Draw", Context.ConnectionId, imageBase64);
+            // TODO: Add server-side validation for player's turn.
+            await Clients.SendAll("Draw", imageBase64);
+        }
+
+        public async void Clear()
+        {
+            // TODO: Add server-side validation for player's turn.
+            await Clients.SendAll("Clear", string.Empty);
         }
     }
 }

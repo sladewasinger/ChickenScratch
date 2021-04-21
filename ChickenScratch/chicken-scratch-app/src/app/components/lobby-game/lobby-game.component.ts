@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { Point } from 'src/app/models/point';
 import { Subscription } from 'rxjs';
 import { LobbyState } from 'src/app/models/lobbyState';
@@ -21,6 +21,7 @@ export class LobbyGameComponent implements OnInit {
   outputDiv: HTMLElement;
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
+  @ViewChild("imgContainer") imageContainer;
 
   subs: Subscription[] = [];
 
@@ -56,30 +57,24 @@ export class LobbyGameComponent implements OnInit {
     this.subs.push(
       this.lobbyStateService.getLobbyState().subscribe(l => {
         this.lobbyState = l;
-      })
-    );
-
-    this.subs.push(
+      }),
       this.hubSocketService.listenOn<string>("Draw").subscribe(x => {
         this.onDrawRequestReceived(x);
-      })
-    );
-
-    this.subs.push(
+      }),
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
-      })
-    );
-
-    this.subs.push(
+      }),
       this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
         console.log("Game State Update: ", x);
         this.gameState = x;
+      }),
+      this.hubSocketService.listenOn<void>("Clear").subscribe(x => {
+        this.onClearRequestReceived();
       })
     );
 
     try {
-      var hubResponse = await (await this.hubSocketService.sendWithPromise<HubResponse<any>>("GetGameState", {}));
+      var hubResponse = await this.hubSocketService.sendWithPromise<HubResponse<any>>("GetGameState", {});
 
       if (!hubResponse.isSuccess) {
         throw hubResponse;
@@ -100,7 +95,7 @@ export class LobbyGameComponent implements OnInit {
 
     var ctx = this.canvas.getContext("2d");
     ctx.fillStyle = "rgb(255,255,255)";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.imageSmoothingEnabled = false;
 
     this.canvas.addEventListener("mousedown", this.startDraw.bind(this));
@@ -150,17 +145,35 @@ export class LobbyGameComponent implements OnInit {
   }
 
   async onDrawRequestReceived(base64) {
-    if (!this.myTurn) {
-      var data = base64;
+    //if (!this.myTurn) {
+    var data = base64;
 
-      var img = new Image();
-      img.onload = () => {
-        var ctx = this.canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, 0, 0);
-      };
-      img.src = data;
+    var img = new Image();
+    img.onload = () => {
+      // var ctx = this.canvas.getContext("2d");
+      // ctx.imageSmoothingEnabled = false;
+      // ctx.drawImage(img, 0, 0);
+
+      this.imageContainer.nativeElement.appendChild(img);
+    };
+    img.style.position = 'absolute';
+    img.style.top = '0';
+    img.style.left = '0';
+    img.style.pointerEvents = 'none';
+    img.src = data;
+    //}
+  }
+
+  async onClearRequestReceived() {
+    const parent = this.imageContainer.nativeElement;
+
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
     }
+  }
+
+  sendClear() {
+    this.hubSocketService.send("Clear", "");
   }
 
   getTouchPos(canvasDom, touchEvent) {
@@ -171,17 +184,6 @@ export class LobbyGameComponent implements OnInit {
     };
   }
 
-  draw() {
-    var ctx = this.canvas.getContext("2d");
-
-    if (this.myTurn) {
-      if (this.drawing) {
-        ctx.lineTo(this.mousePos.x, this.mousePos.y);
-        ctx.stroke();
-      }
-    }
-  }
-
   captureMousePos(e: MouseEvent) {
     this.oldMousePos.x = this.mousePos.x;
     this.oldMousePos.y = this.mousePos.y;
@@ -189,6 +191,17 @@ export class LobbyGameComponent implements OnInit {
     this.mousePos.y = e.offsetY;
 
     this.draw();
+  }
+
+  draw() {
+    if (this.myTurn) {
+      if (this.drawing) {
+        var ctx = this.canvas.getContext("2d");
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.lineTo(this.mousePos.x, this.mousePos.y);
+        ctx.stroke();
+      }
+    }
   }
 
   startDraw() {
@@ -208,11 +221,12 @@ export class LobbyGameComponent implements OnInit {
     if (this.myTurn) {
       this.doSend();
     }
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   doSend() {
     var canvas = document.getElementById("canvas");
-    var canvasDataURL = this.canvas.toDataURL('image/jpeg', 0.6);
+    var canvasDataURL = this.canvas.toDataURL(); // this.canvas.toDataURL('image/jpeg', 0.6);
     let data = {
       imageBase64: canvasDataURL
     };

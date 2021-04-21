@@ -1,5 +1,9 @@
 <div style="width: 100vw;">
     <b *ngIf="myTurn">WORD: '{{ gameState.currentWord }}'. YOUR TURN! DRAW IN THE BLUE BOX BELOW!</b>
-    <canvas id="canvas"></canvas>
+    <div class="canvas-container">
+        <canvas id="canvas" width="500px" height="400px"></canvas>
+        <div #imgContainer class="image-container"></div>
+    </div>
+    <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
     <div id="output"></div>
 </div>

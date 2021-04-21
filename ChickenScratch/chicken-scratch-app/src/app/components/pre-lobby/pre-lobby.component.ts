@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 })
 export class PreLobbyComponent implements OnInit {
   playerForm: FormGroup;
+  joinLobbyForm: FormGroup;
   subs: Subscription[] = [];
   myPlayer: Player;
 
@@ -23,28 +24,35 @@ export class PreLobbyComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder) { }
 
-  get playerName() {
-    return this.playerForm.get('playerName');
-  }
-
-  async ngOnDestroy() {
-    this.subs.forEach(x => x.unsubscribe());
-  }
-
-  async ngOnInit() {
+    async ngOnInit() {
     this.subs.push(
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
-      })
+      }),
+      this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x))
     );
 
     this.playerForm = this.formBuilder.group({
       playerName: new FormControl('', [Validators.required, Validators.minLength(1)])
     });
 
-    console.log("ngoninit");
-    this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x));
+    this.joinLobbyForm = this.formBuilder.group({
+      lobbyKey: new FormControl('', [Validators.required, Validators.minLength(1)])
+    });
+
     await this.tryConnect();
+  }
+  
+  async ngOnDestroy() {
+    this.subs.forEach(x => x.unsubscribe());
+  }
+
+  get playerName() {
+    return this.playerForm.get('playerName');
+  }
+
+  get lobbyKey() {
+    return this.joinLobbyForm.get('lobbyKey');
   }
 
   async tryConnect() {
@@ -61,7 +69,7 @@ export class PreLobbyComponent implements OnInit {
   }
 
   async onDisconnect(x) {
-    console.log("ondisccddf");
+    console.log("ondisconnected");
     await this.tryConnect();
   }
 
@@ -108,12 +116,9 @@ export class PreLobbyComponent implements OnInit {
   }
 
   async joinLobby() {
-    var lobbyKeyInput = document.getElementById("lobby-key") as HTMLInputElement;
-    var lobbyKey = lobbyKeyInput.value;
-
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("joinLobby", {
-        lobbyKey: lobbyKey
+        lobbyKey: this.lobbyKey.value
       });
 
       if (!response.isSuccess) {
@@ -123,7 +128,7 @@ export class PreLobbyComponent implements OnInit {
       this.router.navigate(['lobby']);
     }
     catch (error) {
-      console.log("join lobby failed:" + error.errorMessage);
+      console.log("join lobby failed:" + error);
     }
   }
 }
