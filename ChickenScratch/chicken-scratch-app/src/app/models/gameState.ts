@@ -1,11 +1,14 @@
 import { Player } from "./player";
 
 export interface GameState {
-    players: Player[],
+    players: GamePlayer[],
     activePlayer: GamePlayer,
     currentWord: string
 }
 
-export interface GamePlayer extends Player {
+export interface GamePlayer {
+    id: string;
+    name: string;
     score: number;
+    hasGuessedCorrectly: boolean;
 }

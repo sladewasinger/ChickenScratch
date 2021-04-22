@@ -1,5 +1,5 @@
-﻿using ChickenScratch.Extensions;
-using ChickenScratch.Game;
+﻿using ChickenScratchEngine;
+using ChickenScratchEngine.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace ChickenScratch.Models
 
         private string GenerateKey()
         {
-            char[] letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+            char[] letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
             return new string(Enumerable.Repeat(letters, 4).Select(s => s[StaticRandom.Random.Next(0, letters.Length)]).ToArray());
         }
     }

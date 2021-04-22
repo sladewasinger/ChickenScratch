@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ChickenScratch.Extensions
+namespace ChickenScratchEngine.Extensions
 {
     public static class StaticRandom
     {

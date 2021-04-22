@@ -1,14 +1,16 @@
 <h3 *ngIf="!lobby">NO LOBBY</h3>
 <div *ngIf="lobbyState && lobby && myPlayer">
-    <div style="width: 100vw; text-align: center">
+    <div>
         <h3>Lobby: {{ lobby.key }}</h3>
-        <div *ngIf="!this.gameState && lobby.lobbyLeader.id == myPlayer.id">
-            <button (click)="startGame()">START GAME</button>
+        <div *ngIf="!gameState">
+            <div *ngIf="lobby.lobbyLeader.id == myPlayer.id">
+                <button (click)="startGame()">START GAME</button>
+            </div>
+            <ol>
+                <li *ngFor="let player of players">{{ player.name }}</li>
+            </ol>
         </div>
     </div>
-    <ol>
-        <li *ngFor="let player of players">{{ player.name }}</li>
-    </ol>
 </div>
 
 <app-lobby-game *ngIf="lobby.gameRunning">

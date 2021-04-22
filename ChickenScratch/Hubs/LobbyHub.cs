@@ -72,6 +72,11 @@ namespace ChickenScratch.Hubs
                 return HubResponse
                     .Error($"Could not find lobby with key: '{lobbyKey}'.");
             }
+            if (lobby.GameRunning)
+            {
+                return HubResponse
+                    .Error($"Game is already running! Cannot join!");
+            }
 
             lobby.Players.Add(player);
             lobbyRepository.AddOrUpdate(lobby.ID, lobby);
@@ -82,24 +87,25 @@ namespace ChickenScratch.Hubs
 
         public async override void OnDisconnectedAsync()
         {
-            var lobbyContainingPlayer = lobbyRepository.GetAll().SingleOrDefault(x => x.Players.Any(p => p.ConnectionId == Context.ConnectionId));
-            if (lobbyContainingPlayer != null)
+            var lobby = lobbyRepository.GetAll().SingleOrDefault(x => x.Players.Any(p => p.ConnectionId == Context.ConnectionId));
+            if (lobby != null)
             {
-                var player = lobbyContainingPlayer.Players.FirstOrDefault(p => p.ConnectionId == Context.ConnectionId);
-                lobbyContainingPlayer.Players.Remove(player);
-                if (!lobbyContainingPlayer.Players.Any())
+                var player = lobby.Players.FirstOrDefault(p => p.ConnectionId == Context.ConnectionId);
+                lobby.Players.Remove(player);
+
+                if (!lobby.Players.Any())
                 {
-                    lobbyRepository.TryRemove(lobbyContainingPlayer.ID, out _);
+                    lobbyRepository.TryRemove(lobby.ID, out _);
                 }
                 else
                 {
-                    lobbyRepository.AddOrUpdate(lobbyContainingPlayer.ID, lobbyContainingPlayer);
+                    lobbyRepository.AddOrUpdate(lobby.ID, lobby);
                 }
 
-                var gamePlayer = lobbyContainingPlayer.Engine?.GetGamePlayer(player);
+                var gamePlayer = lobby.Engine?.GetGamePlayer(player.ID);
                 if (gamePlayer != null)
                 {
-                    lobbyContainingPlayer.Engine.PlayerLeft(lobbyContainingPlayer.Engine.GetGamePlayer(player));
+                    lobby.Engine.PlayerLeft(lobby.Engine.GetGamePlayer(player.ID));
                 }
                 await Clients.SendAllExcept("LobbyStateUpdated", Context.ConnectionId, lobbyStateManager.GetState());
             }

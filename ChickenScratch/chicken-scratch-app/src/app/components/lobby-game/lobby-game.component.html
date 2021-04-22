@@ -1,9 +1,39 @@
-<div style="width: 100vw;">
-    <b *ngIf="myTurn">WORD: '{{ gameState.currentWord }}'. YOUR TURN! DRAW IN THE BLUE BOX BELOW!</b>
-    <div class="canvas-container">
-        <canvas id="canvas" width="500px" height="400px"></canvas>
-        <div #imgContainer class="image-container"></div>
+<div style="width: 100vw;" *ngIf="gameState">
+    <ol>
+        <li *ngFor="let player of gamePlayers">{{ player.name }} | {{ player.score }}</li>
+    </ol>
+    <div *ngIf="myTurn">
+        <p>
+            It's your turn to draw!
+            The word is: <b>{{ gameState.currentWord }}</b>.
+        </p>
     </div>
-    <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
-    <div id="output"></div>
+    <div *ngIf="!myTurn">
+        <p>It's <b>{{gameState.activePlayer.name}}</b>'s turn to draw! You need to guess what he/she is drawing!</p>
+    </div>
+</div>
+<div class="canvas-container">
+    <canvas id="canvas" width="500px" height="400px"></canvas>
+    <div #imgContainer class="image-container"></div>
+</div>
+<div *ngIf="gameState">
+    <div *ngIf="myTurn">
+        <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
+    </div>
+    <div class="row" *ngIf="guessForm && !myTurn">
+        <div class="col-sm">
+            <form *ngIf="!myGamePlayer.hasGuessedCorrectly" [formGroup]="guessForm" (ngSubmit)="guessFormSubmit()"
+                autocomplete="off">
+                <div class="form-group">
+                    <label for="guess">Guess the word:</label>
+                    <input type="text" class="form-control" id="guess" formControlName="guess"
+                        placeholder="Enter your guess" required>
+                </div>
+                <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">GUESS</button>
+            </form>
+            <div *ngIf="!!myGamePlayer.hasGuessedCorrectly">
+                You guessed correctly!
+            </div>
+        </div>
+    </div>
 </div>

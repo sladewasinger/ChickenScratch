@@ -24,7 +24,7 @@ export class PreLobbyComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder) { }
 
-    async ngOnInit() {
+  async ngOnInit() {
     this.subs.push(
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
@@ -42,7 +42,7 @@ export class PreLobbyComponent implements OnInit {
 
     await this.tryConnect();
   }
-  
+
   async ngOnDestroy() {
     this.subs.forEach(x => x.unsubscribe());
   }
@@ -128,7 +128,7 @@ export class PreLobbyComponent implements OnInit {
       this.router.navigate(['lobby']);
     }
     catch (error) {
-      console.log("join lobby failed:" + error);
+      console.log("join lobby failed:", error);
     }
   }
 }

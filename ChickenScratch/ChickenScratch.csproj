@@ -12,10 +12,12 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
+    <Folder Include="Game\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\HubSockets\HubSockets.csproj" />
+    <ProjectReference Include="..\ChickenScratchEngine\ChickenScratchEngine.csproj" />
   </ItemGroup>
 
 </Project>

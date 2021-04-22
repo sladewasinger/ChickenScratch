@@ -1,10 +1,14 @@
-﻿using ChickenScratch.Game;
-using ChickenScratch.Models;
+﻿using ChickenScratch.Models;
 using ChickenScratch.Repositories;
 using ChickenScratch.Services;
+using ChickenScratchEngine;
+using ChickenScratchEngine.Models;
 using HubSockets;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using static ChickenScratchEngine.GameEngine;
 
 namespace ChickenScratch.Hubs
 {
@@ -43,15 +47,44 @@ namespace ChickenScratch.Hubs
             GameEngine engine = new GameEngine();
             lobby.Engine = engine;
 
-            engine.GameStateUpdated += (o, e) => OnGameStateUpdated(lobby);
-            engine.StartGame(lobby);
+            engine.GameStateUpdated += (o, e) => OnGameStateUpdated(lobby, e);
+            List<GamePlayer> players = lobby.Players.Select(p => engine.CreateGamePlayer(p.Name, p.ID)).ToList();
+            engine.StartGame(players);
 
             lobbyRepository.AddOrUpdate(lobby.ID, lobby);
-            
+
             await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
 
-            var gameState = engine.GetGameStateForPlayer(engine.GetGamePlayer(player));
+            var gameState = engine.GetGameStateForPlayer(engine.GetGamePlayer(player.ID));
             return HubResponse<GameState>.Success(gameState);
+        }
+
+        public HubResponse Guess(string guess)
+        {
+            if (!playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player player))
+            {
+                return HubResponse
+                    .Error($"Can't find player associated with connectionId: {Context.ConnectionId}");
+            }
+            if (!lobbyRepository.TryGetByPlayer(player, out Lobby lobby))
+            {
+                return HubResponse
+                    .Error($"Could not find lobby that contains player: '{player.Name}'.");
+            }
+            if (lobby.Engine == null)
+            {
+                return HubResponse
+                    .Error("Lobby does not have an engine.");
+            }
+
+            bool correctGuess = lobby.Engine.GuessWord(lobby.Engine.GetGamePlayer(player.ID), guess);
+            if (!correctGuess)
+            {
+                return HubResponse<bool>.Success(false);
+            }
+
+            OnGameStateUpdated(lobby);
+            return HubResponse<bool>.Success(true);
         }
 
         public HubResponse GetGameState()
@@ -70,18 +103,24 @@ namespace ChickenScratch.Hubs
             {
                 return HubResponse
                     .Error("Lobby does not have an engine.");
-
             }
 
-            var gameState = lobby.Engine.GetGameStateForPlayer(lobby.Engine.GetGamePlayer(player));
+            var gameState = lobby.Engine.GetGameStateForPlayer(lobby.Engine.GetGamePlayer(player.ID));
             return HubResponse<GameState>.Success(gameState);
         }
 
-        private async void OnGameStateUpdated(Lobby lobby)
+        private async void OnGameStateUpdated(Lobby lobby, EventArgs e = null)
         {
-            foreach(var player in lobby.Players)
+            if (e is GameStateUpdatedArgs gameStateArgs && gameStateArgs.GameState != null)
             {
-                var gameState = lobby.Engine.GetGameStateForPlayer(lobby.Engine.GetGamePlayer(player));
+                if (gameStateArgs.GameState.ClearCanvas)
+                {
+                    await Clients.SendAll("Clear", string.Empty);
+                }
+            }
+            foreach (var player in lobby.Players)
+            {
+                var gameState = lobby.Engine.GetGameStateForPlayer(lobby.Engine.GetGamePlayer(player.ID));
                 await Clients.SendToClient("GameStateUpdated", player.ConnectionId, gameState);
             }
         }

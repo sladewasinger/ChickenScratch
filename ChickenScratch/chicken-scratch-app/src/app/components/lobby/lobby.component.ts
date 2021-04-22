@@ -8,7 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { Lobby } from 'src/app/models/lobby';
 import { LobbyState } from 'src/app/models/lobbyState';
-import { GameState } from 'src/app/models/gameState';
+import { GamePlayer, GameState } from 'src/app/models/gameState';
 import { Observable, Subscription } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
@@ -18,12 +18,6 @@ import { first, take } from 'rxjs/operators';
   styleUrls: ['./lobby.component.scss']
 })
 export class LobbyComponent implements OnInit, OnDestroy {
-  drawing = false;
-  canvas: HTMLCanvasElement;
-  outputDiv: HTMLElement;
-  mousePos = new Point(0, 0);
-  oldMousePos = new Point(0, 0);
-
   subs: Subscription[] = [];
 
   lobbyState: LobbyState;
@@ -37,6 +31,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   get players(): Player[] {
     return this.lobby?.players;
+  }
+
+  get gamePlayers(): GamePlayer[] {
+    return this.gameState?.players;
   }
 
   get myTurn(): boolean {
@@ -56,12 +54,13 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.subs.push(
       this.lobbyStateService.getLobbyState().subscribe(l => {
         this.lobbyState = l;
-      })
-    );
-
-    this.subs.push(
+      }),
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
+      }),
+      this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
+        console.log("Game State Update: ", x);
+        this.gameState = x;
       })
     );
   }

@@ -9,6 +9,7 @@ import { HubSocketService } from 'src/app/services/hub-socket.service';
 import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-lobby-game',
@@ -18,7 +19,6 @@ import { HubResponse } from 'src/app/models/hubResponse';
 export class LobbyGameComponent implements OnInit {
   drawing = false;
   canvas: HTMLCanvasElement;
-  outputDiv: HTMLElement;
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
   @ViewChild("imgContainer") imageContainer;
@@ -28,6 +28,7 @@ export class LobbyGameComponent implements OnInit {
   lobbyState: LobbyState;
   myPlayer: Player;
   gameState: GameState;
+  guessForm: FormGroup;
 
   get lobby(): Lobby {
     return this.lobbyState?.lobbies
@@ -42,11 +43,24 @@ export class LobbyGameComponent implements OnInit {
     return this.gameState?.activePlayer?.id == this.myPlayer?.id;
   }
 
+  get myGamePlayer() {
+    return this.gameState?.players.find(x => x.id == this.myPlayer.id);
+  }
+
+  get guess() {
+    return this.guessForm?.get('guess');
+  }
+
+  get gamePlayers() {
+    return this.gameState?.players;
+  }
+
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
     private activatedRoute: ActivatedRoute,
     private changeDetector: ChangeDetectorRef,
-    private router: Router) {
+    private router: Router,
+    private formBuilder: FormBuilder) {
   }
 
   async ngOnDestroy() {
@@ -85,10 +99,13 @@ export class LobbyGameComponent implements OnInit {
     catch (error) {
       console.log("ERROR! Could not get initial game state.", error);
     }
+
+    this.guessForm = this.formBuilder.group({
+      guess: new FormControl('', [Validators.required, Validators.minLength(1)])
+    });
   }
 
   ngAfterViewInit() {
-    this.outputDiv = document.getElementById("output");
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     this.canvas.width = 500;
     this.canvas.height = 400;
@@ -174,6 +191,24 @@ export class LobbyGameComponent implements OnInit {
 
   sendClear() {
     this.hubSocketService.send("Clear", "");
+  }
+
+  async guessFormSubmit() {
+    const response = await this.hubSocketService.sendWithPromise<HubResponse<boolean>>("Guess", {
+      guess: this.guess.value
+    });
+
+    this.guess.reset();
+
+    if (!response.isSuccess) {
+      throw response;
+    }
+
+    if (!!response.data) {
+      console.log("YAY! YOU GUESSED RIGHT!");
+    } else {
+      console.log('Incorrect guess ' + this.guess.value + '! Guess again!');
+    }
   }
 
   getTouchPos(canvasDom, touchEvent) {
