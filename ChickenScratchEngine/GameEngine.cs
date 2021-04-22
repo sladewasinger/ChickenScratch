@@ -119,8 +119,9 @@ namespace ChickenScratchEngine
             {
                 if (!gamePlayer.HasGuessedCorrectly)
                 {
+                    gamePlayer.Score += Math.Max(10, 100 - Math.Max(0, 10 * gameState.Players.Count(x => x.HasGuessedCorrectly)));
                     gamePlayer.HasGuessedCorrectly = true;
-                    gamePlayer.Score += 100;
+                    gameState.ActivePlayer.Score += (int)Math.Ceiling(100.00 / (gameState.Players.Count()-1));
                 }
 
                 if (gameState.Players
