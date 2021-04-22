@@ -113,7 +113,7 @@ namespace ChickenScratch.Hubs
         {
             if (e is GameStateUpdatedArgs gameStateArgs && gameStateArgs.GameState != null)
             {
-                if (gameStateArgs.GameState.ClearCanvas)
+                if (gameStateArgs.GameState.StartOfNewRound)
                 {
                     await Clients.SendAll("Clear", string.Empty);
                 }

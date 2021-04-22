@@ -105,9 +105,9 @@ namespace ChickenScratchEngine
                 player.HasGuessedCorrectly = false;
             }
 
-            gameState.ClearCanvas = true;
+            gameState.StartOfNewRound = true;
             OnGameStateUpdated(new GameStateUpdatedArgs() { GameState = gameState });
-            gameState.ClearCanvas = false;
+            gameState.StartOfNewRound = false;
 
             /* Start timer back up - this resets it */
             gameTimer.Start();
@@ -178,7 +178,8 @@ namespace ChickenScratchEngine
             {
                 ActivePlayer = gameState.ActivePlayer,
                 CurrentWord = "",
-                Players = gameState.Players
+                Players = gameState.Players,
+                StartOfNewRound = gameState.StartOfNewRound
             };
         }
     }

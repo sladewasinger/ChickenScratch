@@ -81,6 +81,10 @@ export class LobbyGameComponent implements OnInit {
       this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
         console.log("Game State Update: ", x);
         this.gameState = x;
+        if (this.gameState.startOfNewRound) {
+          document.body.style.backgroundColor = "#bbF";
+          setTimeout(() => document.body.style.backgroundColor = "#FFF", 1000);
+        }
       }),
       this.hubSocketService.listenOn<void>("Clear").subscribe(x => {
         this.onClearRequestReceived();
