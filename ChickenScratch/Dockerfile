@@ -21,4 +21,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_URLS https://*:5001;http://*:5000
-ENTRYPOINT ["dotnet", "ChickenScratch.dll"]
+# ENTRYPOINT ["dotnet", "ChickenScratch.dll"]
+ENTRYPOINT ["dotnet", "run"]
