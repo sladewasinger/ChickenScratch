@@ -19,11 +19,13 @@ Right now you can open as many tabs as you want and connect them to the server. 
 * Add levenshtein distance algorithm for determing how close a typed guess is to the word.
 
 # How to Run:
-* Make sure you have the sladewasinger/HubSockets repo cloned in the same parent folder as this one.
-* Follow these instructions for SSL cert setup: https://medium.com/@rubenvermeulen/running-angular-cli-over-https-with-a-trusted-certificate-4a0d5f92747a
-* In the commandline, from the project directory, run:  
-  * ```dotnet restore```  
-  * ```dotnet run```
-* From the chicken-scratch-app folder:  
+* Follow these instructions for SSL cert setup: https://medium.com/@rubenvermeulen/running-angular-cli-over-https-with-a-trusted-certificate-4a0d5f92747a  
+  
+From the commandline:  
+* **.../ChickenScratch/ChickenScratch/**:
+  * ```dotnet restore```  (first time only)
+  * ```dotnet watch run --project=ChickenScratch```
+* **.../ChickenScratch/ChickenScratch/chicken-scratch-app**:
+  * ```npm install``` (first time only)
   * ```npm run start```  
 * Navigate to https://localhost:4201
