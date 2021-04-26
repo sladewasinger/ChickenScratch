@@ -123,6 +123,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "chicken-scratch-app"
 }

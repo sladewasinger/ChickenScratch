@@ -18,10 +18,14 @@
     <div #imgContainer class="image-container"></div>
 </div>
 <div *ngIf="gameState">
-    <div *ngIf="myTurn">
+    <div *ngIf="myTurn" class="controls">
         <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
-        <button class="btn btn-primary" (click)="switchToEraser()">Eraser</button>
-        <button class="btn btn-primary" (click)="switchToBlackBrush()">BLACK BRUSH</button>
+        <button class="btn btn-outline-dark large-font" (click)="switchToEraser()">
+            <i class="fas fa-eraser"></i>
+        </button>
+        <button class="btn btn-outline-dark large-font" (click)="switchToBlackBrush()"><i
+                class="fas fa-paint-brush"></i></button>
+        <input type="color" id="head" name="head" value="#000">
     </div>
     <div class="row" *ngIf="guessForm && !myTurn">
         <div class="col-sm">

@@ -35,3 +35,23 @@
         left: 0;
     }
 }
+
+.circle {
+    background-color: #000;
+    border: 2px solid #fff;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+.large-font {
+    font-size: 24px;
+}
+
+.controls {
+    display: flex;
+    padding: 5px;
+    * {
+        margin: 5px;
+    }
+}
