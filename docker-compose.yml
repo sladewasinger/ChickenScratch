@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  chickenscratch:
+    image: ${DOCKER_REGISTRY-}chickenscratch
+    build:
+      context: .
+      dockerfile: ChickenScratch/Dockerfile
+    ports:
+        - "5000:5000"
+        - "5001:5001"
+
+  chickenscratch.app:
+    image: ${DOCKER_REGISTRY-}chickenscratchapp
+    build:
+      context: .
+      dockerfile: ChickenScratch/chicken-scratch-app/Dockerfile
+    ports:
+        - "4200:4200"
+        - "49153:49153"
+    volumes:
+        - ./ChickenScratch/chicken-scratch-app:/app
