@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ChickenScratch.Hubs;
 using ChickenScratch.Repositories;
-using HubSockets;
 using ChickenScratch.Services;
+using HubSockets;
 
 namespace ChickenScratch
 {
