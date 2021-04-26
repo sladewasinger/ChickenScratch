@@ -7,11 +7,21 @@
     user-select: none;
 }
 
+#mouseCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    z-index: 100;
+    pointer-events: none;
+}
+
 #canvas {
     position: absolute;
     top: 0;
     left: 0;
     box-sizing: border-box;
+    z-index: 10;
 }
 
 .image-container {

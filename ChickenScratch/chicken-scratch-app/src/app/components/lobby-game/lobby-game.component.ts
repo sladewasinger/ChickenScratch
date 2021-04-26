@@ -10,6 +10,7 @@ import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { BlackBrush, Brush, Eraser } from 'src/app/models/brushes/brushes';
 
 @Component({
   selector: 'app-lobby-game',
@@ -19,6 +20,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 export class LobbyGameComponent implements OnInit {
   drawing = false;
   canvas: HTMLCanvasElement;
+  mouseCanvas: HTMLCanvasElement;
   mousePos = new Point(0, 0);
   oldMousePos = new Point(0, 0);
   @ViewChild("imgContainer") imageContainer;
@@ -29,6 +31,8 @@ export class LobbyGameComponent implements OnInit {
   myPlayer: Player;
   gameState: GameState;
   guessForm: FormGroup;
+
+  currentBrush: Brush;
 
   get lobby(): Lobby {
     return this.lobbyState?.lobbies
@@ -111,20 +115,14 @@ export class LobbyGameComponent implements OnInit {
 
   ngAfterViewInit() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    this.canvas.width = 500;
-    this.canvas.height = 400;
+    this.mouseCanvas = document.getElementById("mouseCanvas") as HTMLCanvasElement;
 
-    var ctx = this.canvas.getContext("2d");
-    ctx.fillStyle = "rgb(255,255,255)";
-    // ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.imageSmoothingEnabled = false;
+    this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
+    window.addEventListener("mouseup", this.onMouseUp.bind(this));
+    this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
+    this.canvas.addEventListener("mouseout", this.onMouseOut.bind(this));
 
-    this.canvas.addEventListener("mousedown", this.startDraw.bind(this));
-    window.addEventListener("mouseup", this.stopDraw.bind(this));
-    //canvas.addEventListener("mouseout", stopDraw);
-    this.canvas.addEventListener("mousemove", this.captureMousePos.bind(this));
-
-    // Set up touch events for mobile, etc
+    // Set up touch events for mobile
     this.canvas.addEventListener("touchstart", (e) => {
       var touch = e.touches[0];
       var mouseEvent = new MouseEvent("mousedown", {
@@ -142,8 +140,8 @@ export class LobbyGameComponent implements OnInit {
     }, false);
     this.canvas.addEventListener("touchmove", (e) => {
       var touch = e.touches[0];
-      var mouseEvent = new MouseEvent( // create event
-        'mousemove',   // type of event
+      var mouseEvent = new MouseEvent(
+        'mousemove',
         {
           'view': (event.target as any).ownerDocument.defaultView,
           'bubbles': true,
@@ -159,33 +157,34 @@ export class LobbyGameComponent implements OnInit {
       touch.target.dispatchEvent(mouseEvent);
       e.preventDefault();
     }, false);
-
-
-    // page tweaks:
     this.canvas.onselectstart = () => false;
+
+    this.switchToBlackBrush();
   }
 
   async onDrawRequestReceived(base64) {
-    //if (!this.myTurn) {
     var data = base64;
 
     var img = new Image();
     img.onload = () => {
-      // var ctx = this.canvas.getContext("2d");
-      // ctx.imageSmoothingEnabled = false;
-      // ctx.drawImage(img, 0, 0);
-
       this.imageContainer.nativeElement.appendChild(img);
+      this.clearCanvas();
     };
     img.style.position = 'absolute';
     img.style.top = '0';
     img.style.left = '0';
     img.style.pointerEvents = 'none';
     img.src = data;
-    //}
+  }
+
+  private clearCanvas() {
+    var ctx = this.canvas.getContext("2d");
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   async onClearRequestReceived() {
+    this.clearCanvas();
+
     const parent = this.imageContainer.nativeElement;
 
     while (parent.firstChild) {
@@ -194,7 +193,22 @@ export class LobbyGameComponent implements OnInit {
   }
 
   sendClear() {
+    var ctx = this.canvas.getContext("2d");
+    ctx.fillStyle = "#F00";
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.closePath();
+
+    this.clearCanvas();
+
     this.hubSocketService.send("Clear", "");
+  }
+
+  switchToBlackBrush() {
+    this.currentBrush = new BlackBrush(this.canvas, this.mouseCanvas);
+  }
+
+  switchToEraser() {
+    this.currentBrush = new Eraser(this.canvas, this.mouseCanvas);
   }
 
   async guessFormSubmit() {
@@ -207,64 +221,38 @@ export class LobbyGameComponent implements OnInit {
     if (!response.isSuccess) {
       throw response;
     }
-
-    if (!!response.data) {
-      console.log("YAY! YOU GUESSED RIGHT!");
-    } else {
-      console.log('Incorrect guess ' + this.guess.value + '! Guess again!');
-    }
   }
 
-  getTouchPos(canvasDom, touchEvent) {
-    var rect = canvasDom.getBoundingClientRect();
-    return {
-      x: touchEvent.touches[0].clientX - rect.left,
-      y: touchEvent.touches[0].clientY - rect.top
-    };
-  }
-
-  captureMousePos(e: MouseEvent) {
+  onMouseMove(e: MouseEvent) {
     this.oldMousePos.x = this.mousePos.x;
     this.oldMousePos.y = this.mousePos.y;
     this.mousePos.x = e.offsetX;
     this.mousePos.y = e.offsetY;
 
-    this.draw();
-  }
-
-  draw() {
     if (this.myTurn) {
-      if (this.drawing) {
-        var ctx = this.canvas.getContext("2d");
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        ctx.lineTo(this.mousePos.x, this.mousePos.y);
-        ctx.stroke();
-      }
+      this.currentBrush.onMouseMove(this.mousePos);
     }
   }
 
-  startDraw() {
-    var ctx = this.canvas.getContext("2d");
-    ctx.beginPath();
-    this.drawing = true
+  onMouseDown() {
+    if (this.myTurn) {
+      this.currentBrush.onMouseDown();
+    }
   }
 
-  stopDraw() {
-    if (!this.drawing)
-      return;
-
-    this.drawing = false;
-    var ctx = this.canvas.getContext("2d");
-    ctx.beginPath();
-
+  onMouseUp() {
     if (this.myTurn) {
+      this.currentBrush.onMouseUp();
       this.doSend();
     }
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+  onMouseOut() {
+    if (this.myTurn) {
+      this.currentBrush.onMouseOut();
+    }
   }
 
   doSend() {
-    var canvas = document.getElementById("canvas");
     var canvasDataURL = this.canvas.toDataURL(); // this.canvas.toDataURL('image/jpeg', 0.6);
     let data = {
       imageBase64: canvasDataURL

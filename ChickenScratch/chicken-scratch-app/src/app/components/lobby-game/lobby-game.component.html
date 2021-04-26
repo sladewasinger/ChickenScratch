@@ -14,11 +14,14 @@
 </div>
 <div class="canvas-container">
     <canvas id="canvas" width="500px" height="400px"></canvas>
+    <canvas id="mouseCanvas" width="500px" height="400px"></canvas>
     <div #imgContainer class="image-container"></div>
 </div>
 <div *ngIf="gameState">
     <div *ngIf="myTurn">
         <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
+        <button class="btn btn-primary" (click)="switchToEraser()">Eraser</button>
+        <button class="btn btn-primary" (click)="switchToBlackBrush()">BLACK BRUSH</button>
     </div>
     <div class="row" *ngIf="guessForm && !myTurn">
         <div class="col-sm">
