@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:50063",
-      "sslPort": 44337
+      "applicationUrl": "http://localhost:11438",
+      "sslPort": 44310
     }
   },
   "profiles": {
@@ -15,25 +15,25 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "WebSocket": {
+    "ChickenScratch": {
       "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
-    },
-    "Kestrel": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      }
     },
     "Docker": {
       "commandName": "Docker",
+      "launchBrowser": false,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
-      "publishAllPorts": true,
-      "useSSL": true
+      "environmentVariables": {
+        "ASPNETCORE_URLS": "https://+:5001;http://+:5000",
+        "ASPNETCORE_HTTPS_PORT": "5001"
+      },
+      "httpPort": 5000,
+      "useSSL": true,
+      "sslPort": 5001
     }
   }
 }

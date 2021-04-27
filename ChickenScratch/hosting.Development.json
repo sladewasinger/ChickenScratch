@@ -1,4 +1,0 @@
-"commands": {
-    "web": "Microsoft.AspNet.Server.Kestrel"
-    "webProd": "Microsoft.AspNet.Server.Kestrel --config prod.json"
-}
