@@ -17,7 +17,7 @@ namespace ChickenScratch
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("https://*:50001", "http://*:5000");
+                    webBuilder.UseUrls("http://*:5000");
                     webBuilder.UseStartup<Startup>();
                 });
     }
