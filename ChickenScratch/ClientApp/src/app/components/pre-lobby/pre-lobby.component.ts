@@ -58,7 +58,7 @@ export class PreLobbyComponent implements OnInit {
   async tryConnect() {
     console.log("attempting connect");
     try {
-      await this.hubSocketService.doConnect("ws://" + window.location.hostname + ":8080/ws");
+      await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":443/ws");
     } catch (error) {
       console.log("ERROR connecting to hub socket service: ", error);
     }
