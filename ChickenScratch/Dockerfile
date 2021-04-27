@@ -5,6 +5,13 @@ WORKDIR /app
 EXPOSE 5000
 EXPOSE 5001
 
+FROM node:10.15-alpine AS client 
+ARG skip_client_build=false 
+WORKDIR /app 
+COPY ChickenScratch/chicken-scratch-app . 
+RUN [[ ${skip_client_build} = true ]] && echo "Skipping npm install" || npm install 
+RUN [[ ${skip_client_build} = true ]] && mkdir dist || npm run-script build
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["ChickenScratch/ChickenScratch.csproj", "ChickenScratch/"]
@@ -22,4 +29,5 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_URLS https://*:5001;http://*:5000
 # ENTRYPOINT ["dotnet", "ChickenScratch.dll"]
+COPY --from=client /app/dist /app/dist
 ENTRYPOINT ["dotnet", "run"]
