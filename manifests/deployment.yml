@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: sladewasingerchickenscratch 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sladewasingerchickenscratch
+  template:
+    metadata:
+      labels:
+        app: sladewasingerchickenscratch 
+    spec:
+      containers:
+        - name: sladewasingerchickenscratch 
+          image: chickenscratchcontainerreg.azurecr.io/sladewasingerchickenscratch
+          ports:
+          - containerPort: 5000
