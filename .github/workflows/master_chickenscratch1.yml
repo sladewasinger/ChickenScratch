@@ -52,5 +52,5 @@ jobs:
       with:
         app-name: 'chickenscratch1'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_7303d6ed944648349f8137f3115c070e }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_bd22a094e3cc4a0a9fe5cc17ebe6af40 }}
         package: .
