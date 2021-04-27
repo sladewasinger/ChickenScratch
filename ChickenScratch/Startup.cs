@@ -57,7 +57,8 @@ namespace ChickenScratch
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // This is handled by Azure:
+            // app.UseHttpsRedirection();
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {
