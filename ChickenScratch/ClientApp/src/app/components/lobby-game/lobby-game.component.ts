@@ -164,7 +164,6 @@ export class LobbyGameComponent implements OnInit {
 
   async onDrawRequestReceived(base64) {
     var data = base64 as string;
-    console.log("Image Data:", data);
     
     var img = new Image();
     img.onload = () => {
@@ -175,7 +174,7 @@ export class LobbyGameComponent implements OnInit {
     img.style.top = '0';
     img.style.left = '0';
     img.style.pointerEvents = 'none';
-    img.src = data.replace("%00", "");
+    img.src = data;
   }
 
   private clearCanvas() {
