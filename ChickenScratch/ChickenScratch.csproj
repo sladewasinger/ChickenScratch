@@ -13,8 +13,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="HubSockets" Version="0.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
-		<PackageReference Include="HubSockets" Version="0.0.6" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 
