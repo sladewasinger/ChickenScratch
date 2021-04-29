@@ -111,7 +111,7 @@ export class PreLobbyComponent implements OnInit {
       this.router.navigate(['lobby']);
     }
     catch (error) {
-      console.log("lobby creation failed!");
+      console.log("lobby creation failed!", error);
     }
   }
 

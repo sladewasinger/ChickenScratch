@@ -1,114 +1,39 @@
-﻿using ChickenScratch.Models;
+﻿using ChickenScratch.Hubs;
 using ChickenScratch.Repositories;
-using ChickenScratch.Services;
 using HubSockets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace ChickenScratch.Hubs
+namespace ChickenScratch.Services
 {
-    public class LobbyHub : Hub
+    public partial class LobbyHub : Hub
     {
         private readonly LobbyStateManager lobbyStateManager;
         private readonly LobbyRepository lobbyRepository;
         private readonly PlayerRepository playerRepository;
+        private readonly GameManager gameManager;
 
-        public LobbyHub(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository)
+        public LobbyHub(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameManager gameManager)
         {
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
             this.lobbyRepository = lobbyRepository ?? throw new ArgumentNullException(nameof(lobbyRepository));
             this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            this.gameManager = gameManager ?? throw new ArgumentNullException(nameof(gameManager));
         }
 
-        // TODO: Extract all logic (and error handling?) to lobby state manager.
-        //      combine PlayerHub & LobbyHub logic into lobby state manager. Will make life so much easier.
         public async Task<HubResponse> CreateLobby(string lobbyName)
         {
-            if (!playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player player))
-            {
-                return HubResponse
-                    .Error($"Can't find player associated with connectionId: {Context.ConnectionId}");
-            }
-
-            if (lobbyRepository.GetAll().Any(l => l.Players.Any(p => p.ID == player.ID)))
-            {
-                return HubResponse
-                    .Error($"Player '{player.Name} - {player.ID}' is already in a lobby.");
-            }
-
-            var lobby = new Lobby()
-            {
-                ID = Guid.NewGuid(),
-                Name = lobbyName,
-                Players = new List<Player>()
-                {
-                    player
-                }
-            };
-            lobbyRepository.AddOrUpdate(lobby.ID, lobby);
-
-            await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
-            return HubResponse<LobbyState>.Success(lobbyStateManager.GetState());
+            return await gameManager.CallMethod(nameof(CreateLobby), Context, Clients, lobbyName);
         }
 
         public async Task<HubResponse> JoinLobby(string lobbyKey)
         {
-            if (!playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player player))
-            {
-                return HubResponse
-                    .Error($"Can't find player associated with connectionId: {Context.ConnectionId}");
-            }
-
-            if (lobbyRepository.GetAll().Any(l => l.Players.Any(p => p.ID == player.ID)))
-            {
-                return HubResponse
-                    .Error($"Player '{player.Name} - {player.ID}' is already in a lobby.");
-            }
-
-            if (!lobbyRepository.TryGetByLobbyKey(lobbyKey, out Lobby lobby))
-            {
-                return HubResponse
-                    .Error($"Could not find lobby with key: '{lobbyKey}'.");
-            }
-            if (lobby.GameRunning)
-            {
-                return HubResponse
-                    .Error($"Game is already running! Cannot join!");
-            }
-
-            lobby.Players.Add(player);
-            lobbyRepository.AddOrUpdate(lobby.ID, lobby);
-
-            await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
-            return HubResponse<LobbyState>.Success(lobbyStateManager.GetState());
+            return await gameManager.CallMethod(nameof(JoinLobby), Context, Clients, lobbyKey);
         }
 
         public async override void OnDisconnectedAsync()
         {
-            var lobby = lobbyRepository.GetAll().SingleOrDefault(x => x.Players.Any(p => p.ConnectionId == Context.ConnectionId));
-            if (lobby != null)
-            {
-                var player = lobby.Players.FirstOrDefault(p => p.ConnectionId == Context.ConnectionId);
-                lobby.Players.Remove(player);
-
-                if (!lobby.Players.Any())
-                {
-                    lobbyRepository.TryRemove(lobby.ID, out _);
-                }
-                else
-                {
-                    lobbyRepository.AddOrUpdate(lobby.ID, lobby);
-                }
-
-                var gamePlayer = lobby.Engine?.GetGamePlayer(player.ID);
-                if (gamePlayer != null)
-                {
-                    lobby.Engine.PlayerLeft(lobby.Engine.GetGamePlayer(player.ID));
-                }
-                await Clients.SendAllExcept("LobbyStateUpdated", Context.ConnectionId, lobbyStateManager.GetState());
-            }
+            await lobbyStateManager.PlayerDisconnected(Context, Clients);
             base.OnDisconnectedAsync();
         }
     }

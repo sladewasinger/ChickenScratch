@@ -39,13 +39,12 @@ namespace ChickenScratch
             services.AddHub<PlayerHub>();
             services.AddHub<GameHub>();
             services.AddSingleton<LobbyStateManager>();
+            services.AddTransient<GameManager>();
             services.RegisterHubSockets();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, HubSocketAcceptor socketAcceptor, ILogger<Startup> logger)
         {
-            Log(logger);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -53,12 +52,8 @@ namespace ChickenScratch
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                //app.UseHsts();
             }
 
-            // This is handled by Azure:
-            // app.UseHttpsRedirection();
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {
@@ -86,40 +81,6 @@ namespace ChickenScratch
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
-        }
-
-        private void Log(ILogger<Startup> logger)
-        {
-            // Debugging info to help with running in Docker
-            string defaultCertPath = Configuration.GetSection("Kestrel:Certificates:Default:Path").Value;
-            logger.LogInformation($"Kestrel Default cert path: {defaultCertPath}");
-            if (!string.IsNullOrEmpty(defaultCertPath))
-            {
-                if (File.Exists(defaultCertPath))
-                {
-                    logger.LogInformation("Default Cert file exists");
-                }
-                else
-                {
-                    logger.LogInformation("Default Cert file does NOT exist!");
-                }
-            }
-            logger.LogInformation($"Kestrel Default cert pass: {Configuration.GetSection("Kestrel:Certificates:Default:Password").Value}");
-
-            string devCertPath = Configuration.GetSection("Kestrel:Certificates:Development:Path").Value;
-            logger.LogInformation($"Kestrel Development cert path: {devCertPath}");
-            if (!string.IsNullOrEmpty(devCertPath))
-            {
-                if (File.Exists(devCertPath))
-                {
-                    logger.LogInformation("Development Cert file exists");
-                }
-                else
-                {
-                    logger.LogInformation("Development Cert file does NOT exist!");
-                }
-            }
-            logger.LogInformation($"Kestrel Development cert pass: {Configuration.GetSection("Kestrel:Certificates:Development:Password").Value}");
         }
     }
 }
