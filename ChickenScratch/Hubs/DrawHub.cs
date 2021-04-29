@@ -1,28 +1,26 @@
 ﻿using ChickenScratch.Repositories;
 using HubSockets;
+using System.Threading.Tasks;
 
 namespace ChickenScratch.Hubs
 {
     public class DrawHub : Hub
     {
-        private readonly ImageRepository imageRepository;
+        private readonly GameManager gameManager;
 
-        public DrawHub(ImageRepository imageRepository)
+        public DrawHub(GameManager gameManager)
         {
-            this.imageRepository = imageRepository ?? throw new System.ArgumentNullException(nameof(imageRepository));
+            this.gameManager = gameManager ?? throw new System.ArgumentNullException(nameof(gameManager));
         }
 
-        public async void Draw(string imageBase64)
+        public async Task<HubResponse> Draw(string imageBase64)
         {
-            // await Clients.SendAllExcept("Draw", Context.ConnectionId, imageBase64);
-            // TODO: Add server-side validation for player's turn.
-            await Clients.SendAll("Draw", imageBase64);
+            return await gameManager.CallMethod(nameof(Draw), Context, Clients, imageBase64);
         }
 
-        public async void Clear()
+        public async Task<HubResponse> Clear()
         {
-            // TODO: Add server-side validation for player's turn.
-            await Clients.SendAll("Clear", string.Empty);
+            return await gameManager.CallMethod(nameof(Clear), Context, Clients);
         }
     }
 }

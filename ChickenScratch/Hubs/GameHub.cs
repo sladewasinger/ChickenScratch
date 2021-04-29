@@ -36,5 +36,10 @@ namespace ChickenScratch.Hubs
         {
             return await gameManager.CallMethod(nameof(Guess), Context, Clients, guess);
         }
+
+        public async Task<HubResponse> GetGameState()
+        {
+            return await gameManager.CallMethod(nameof(GetGameState), Context, Clients);
+        }
     }
 }

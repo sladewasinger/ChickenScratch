@@ -58,21 +58,21 @@ namespace ChickenScratch.Hubs
                     }
                 }
 
-                if (needsPlayerInLobby)
+                if (needsPlayerInLobby || needsGameInProgress)
                 {
                     if (!lobbyRepository.TryGetByPlayer(player, out lobby))
                     {
                         return HubResponse
                             .Error($"Could not find lobby that contains player: '{player.Name}'.");
                     }
-                }
 
-                if (needsGameInProgress)
-                {
-                    if (lobby.Engine == null)
+                    if (needsGameInProgress)
                     {
-                        return HubResponse
-                            .Error("Lobby does not have a game in progress!");
+                        if (lobby.Engine == null)
+                        {
+                            return HubResponse
+                                .Error("Lobby does not have a game in progress!");
+                        }
                     }
                 }
             }
@@ -86,8 +86,17 @@ namespace ChickenScratch.Hubs
                 player,
                 lobby);
 
-            Task<HubResponse> task = (Task<HubResponse>)gameMethod.Invoke(gameLogic, methodParameters);
-            HubResponse returnResult = await task;
+
+            object invokeResult = gameMethod.Invoke(gameLogic, methodParameters);
+            HubResponse returnResult;
+            if (invokeResult is Task)
+            {
+                returnResult = await ((Task<HubResponse>)invokeResult);
+            }
+            else
+            {
+                returnResult = (HubResponse)invokeResult;
+            }
 
             return returnResult;
         }

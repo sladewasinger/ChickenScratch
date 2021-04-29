@@ -149,6 +149,11 @@ namespace ChickenScratchEngine
             return gameState.Players.SingleOrDefault(p => p.ID == id);
         }
 
+        public bool IsPlayerTheDrawer(Guid id)
+        {
+            return gameState.ActivePlayer.ID == id;
+        }
+
         public void PlayerLeft(GamePlayer player)
         {
             if (player == null)

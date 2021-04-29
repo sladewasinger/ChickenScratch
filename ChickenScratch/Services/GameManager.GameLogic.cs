@@ -81,6 +81,13 @@ namespace ChickenScratch.Hubs
             return HubResponse<LobbyState>.Success(lobbyStateManager.GetState());
         }
 
+        [NeedsGameInProgress]
+        public HubResponse GetGameState()
+        {
+            var gameState = lobby.Engine.GetGameStateForPlayer(lobby.Engine.GetGamePlayer(player.ID));
+            return HubResponse<GameState>.Success(gameState);
+        }
+
         [NeedsPlayerInLobby]
         public async Task<HubResponse> StartGame()
         {
@@ -115,6 +122,32 @@ namespace ChickenScratch.Hubs
             }
 
             OnGameStateUpdated(lobby);
+            return HubResponse<bool>.Success(true);
+        }
+
+        [NeedsGameInProgress]
+        public async Task<HubResponse> Draw(string imageBase64)
+        {
+            GamePlayer gamePlayer = lobby.Engine.GetGamePlayer(player.ID);
+            if (!lobby.Engine.IsPlayerTheDrawer(gamePlayer.ID))
+            {
+                return HubResponse.Error("Current player is not the active drawer!");
+            }
+
+            await Clients.SendToClients("Draw", lobby.Players.Select(x => x.ConnectionId), imageBase64);
+            return HubResponse<bool>.Success(true);
+        }
+
+        [NeedsGameInProgress]
+        public async Task<HubResponse> Clear()
+        {
+            GamePlayer gamePlayer = lobby.Engine.GetGamePlayer(player.ID);
+            if (!lobby.Engine.IsPlayerTheDrawer(gamePlayer.ID))
+            {
+                return HubResponse.Error("Current player is not the active drawer!");
+            }
+
+            await Clients.SendToClients("Clear", lobby.Players.Select(x => x.ConnectionId), string.Empty);
             return HubResponse<bool>.Success(true);
         }
 
