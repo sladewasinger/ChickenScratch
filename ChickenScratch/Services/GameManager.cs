@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ChickenScratch.Hubs
 {
-    public partial class GameManager
+    public class GameManager
     {
         private MethodInfo[] gameMethods;
 
@@ -39,7 +39,10 @@ namespace ChickenScratch.Hubs
 
             bool needsPlayer = gameMethod.GetCustomAttribute(typeof(NeedsPlayerAttribute)) != null;
             bool playerCannotBeInALobby = gameMethod.GetCustomAttribute(typeof(PlayerCannotBeInALobbyAttribute)) != null;
-            if (needsPlayer || playerCannotBeInALobby)
+            bool needsPlayerInLobby = gameMethod.GetCustomAttribute(typeof(NeedsPlayerInLobby)) != null;
+            bool needsGameInProgress = gameMethod.GetCustomAttribute(typeof(NeedsGameInProgressAttribute)) != null;
+
+            if (needsPlayer || playerCannotBeInALobby || needsPlayerInLobby || needsGameInProgress)
             {
                 if (!playerRepository.TryGetByConnectionId(context.ConnectionId, out player))
                 {
@@ -52,6 +55,24 @@ namespace ChickenScratch.Hubs
                     {
                         return HubResponse
                             .Error($"Player '{player.Name} - {player.ID}' is already in a lobby.");
+                    }
+                }
+
+                if (needsPlayerInLobby)
+                {
+                    if (!lobbyRepository.TryGetByPlayer(player, out lobby))
+                    {
+                        return HubResponse
+                            .Error($"Could not find lobby that contains player: '{player.Name}'.");
+                    }
+                }
+
+                if (needsGameInProgress)
+                {
+                    if (lobby.Engine == null)
+                    {
+                        return HubResponse
+                            .Error("Lobby does not have a game in progress!");
                     }
                 }
             }
@@ -74,5 +95,6 @@ namespace ChickenScratch.Hubs
         public class NeedsPlayerAttribute : Attribute { }
         public class PlayerCannotBeInALobbyAttribute : Attribute { }
         public class NeedsPlayerInLobby : Attribute { }
+        public class NeedsGameInProgressAttribute : Attribute { }
     }
 }
