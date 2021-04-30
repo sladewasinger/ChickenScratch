@@ -6,9 +6,9 @@ namespace ChickenScratch.Hubs
 {
     public class DrawHub : Hub
     {
-        private readonly GameManager gameManager;
+        private readonly GameLogicInvoker gameManager;
 
-        public DrawHub(GameManager gameManager)
+        public DrawHub(GameLogicInvoker gameManager)
         {
             this.gameManager = gameManager ?? throw new System.ArgumentNullException(nameof(gameManager));
         }

@@ -34,12 +34,13 @@ namespace ChickenScratch
             services.AddSingleton<ImageRepository>();
             services.AddSingleton<LobbyRepository>();
             services.AddSingleton<PlayerRepository>();
+            services.AddSingleton<ChatQueue>();
             services.AddHub<DrawHub>();
             services.AddHub<LobbyHub>();
             services.AddHub<PlayerHub>();
             services.AddHub<GameHub>();
             services.AddSingleton<LobbyStateManager>();
-            services.AddTransient<GameManager>();
+            services.AddTransient<GameLogicInvoker>();
             services.RegisterHubSockets();
         }
 
@@ -78,7 +79,8 @@ namespace ChickenScratch
 
                 if (env.IsDevelopment())
                 {
-                    spa.UseAngularCliServer(npmScript: "start");
+                    //spa.UseAngularCliServer(npmScript: "start");
+                    spa.UseProxyToSpaDevelopmentServer("https://localhost:4201");
                 }
             });
         }

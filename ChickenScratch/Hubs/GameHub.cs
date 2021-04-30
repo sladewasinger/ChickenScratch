@@ -14,12 +14,12 @@ namespace ChickenScratch.Hubs
 {
     public class GameHub : Hub
     {
-        private readonly GameManager gameManager;
+        private readonly GameLogicInvoker gameManager;
         private readonly LobbyStateManager lobbyStateManager;
         private readonly LobbyRepository lobbyRepository;
         private readonly PlayerRepository playerRepository;
 
-        public GameHub(GameManager gameManager, LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository)
+        public GameHub(GameLogicInvoker gameManager, LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository)
         {
             this.gameManager = gameManager ?? throw new ArgumentNullException(nameof(gameManager));
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
@@ -41,5 +41,7 @@ namespace ChickenScratch.Hubs
         {
             return await gameManager.CallMethod(nameof(GetGameState), Context, Clients);
         }
+
+
     }
 }

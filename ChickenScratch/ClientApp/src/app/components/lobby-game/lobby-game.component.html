@@ -1,45 +1,63 @@
-<div style="width: 100vw;" *ngIf="gameState">
-    <ol>
-        <li *ngFor="let player of gamePlayers">{{ player.name }} | {{ player.score }}</li>
-    </ol>
-    <div *ngIf="myTurn">
-        <p>
-            It's your turn to draw!
-            The word is: <b>{{ gameState.currentWord }}</b>.
-        </p>
+<div class="container-fluid" [hidden]="!gameState">
+    <div class="row title-row" *ngIf="gameState">
+        <div class="col-sm-12">
+            <h3 *ngIf="myTurn">
+                It's your turn to draw! The word is: <span class="current-word">{{ gameState.currentWord }}</span>
+            </h3>
+            <h3 *ngIf="!myTurn">
+                It's <b>{{ gameState.activePlayer.name }}</b>'s turn to draw! You need to guess what he/she is
+                drawing!
+            </h3>
+        </div>
     </div>
-    <div *ngIf="!myTurn">
-        <p>It's <b>{{gameState.activePlayer.name}}</b>'s turn to draw! You need to guess what he/she is drawing!</p>
+    <div class="row justify-content-center">
+        <div class="col-sm-2">
+            <ol class="player-list">
+                <li *ngFor="let player of gamePlayers" [class.active-player]="player.id == activePlayer.id">
+                    <div>{{ player.name }}</div>
+                    <div class="score">Score: {{ player.score }}</div>
+                </li>
+            </ol>
+        </div>
+        <div class="col-sm-7 d-flex justify-content-center">
+            <div class="canvas-container" [class.canvas-container-active]="myTurn">
+                <canvas #canvas id="canvas" width="500px" height="400px"></canvas>
+                <canvas #mouseCanvas id="mouseCanvas" width="500px" height="400px"></canvas>
+                <div #imgContainer class="image-container"></div>
+            </div>
+        </div>
+        <div class="col-sm-3" #chatLog>
+        </div>
     </div>
-</div>
-<div class="canvas-container">
-    <canvas id="canvas" width="500px" height="400px"></canvas>
-    <canvas id="mouseCanvas" width="500px" height="400px"></canvas>
-    <div #imgContainer class="image-container"></div>
-</div>
-<div *ngIf="gameState">
-    <div *ngIf="myTurn" class="controls">
-        <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
-        <button class="btn btn-outline-dark large-font" (click)="switchToEraser()">
-            <i class="fas fa-eraser"></i>
-        </button>
-        <button class="btn btn-outline-dark large-font" (click)="switchToBlackBrush()"><i
-                class="fas fa-paint-brush"></i></button>
-        <input type="color" id="head" name="head" value="#000">
-    </div>
-    <div class="row" *ngIf="guessForm && !myTurn">
-        <div class="col-sm">
-            <form [formGroup]="guessForm" *ngIf="!myGamePlayer.hasGuessedCorrectly" (ngSubmit)="guessFormSubmit()"
-                autocomplete="off">
-                <div class="form-group">
-                    <label for="guess">Guess the word:</label>
-                    <input type="text" class="form-control" id="guess" formControlName="guess"
-                        placeholder="Enter your guess" required>
+    <div class="row justify-content-center">
+        <div class="col-sm-8 d-flex justify-content-center" *ngIf="gameState">
+            <div *ngIf="myTurn" class="controls">
+                <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
+                <button class="btn btn-outline-dark large-font" (click)="switchToEraser()">
+                    <i class="fas fa-eraser"></i>
+                </button>
+                <button class="btn btn-outline-dark large-font" (click)="switchToBlackBrush()">
+                    <i class="fas fa-paint-brush"></i>
+                </button>
+                <input type="color" id="head" name="head" value="#000" />
+            </div>
+            <div class="row" *ngIf="guessForm && !myTurn">
+                <div class="col-sm">
+                    <form [formGroup]="guessForm" *ngIf="!myGamePlayer.hasGuessedCorrectly"
+                        (ngSubmit)="guessFormSubmit()" autocomplete="off" class="guess-form">
+                        <div class="form-group">
+                            <label for="guess">Guess the word:</label>
+                            <input type="text" class="form-control" id="guess" formControlName="guess"
+                                placeholder="Enter your guess" required maxlength="50" />
+                        </div>
+                        <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">
+                            GUESS
+                        </button>
+                    </form>
+                    <div *ngIf="!!myGamePlayer.hasGuessedCorrectly">
+                        You guessed correctly!
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">GUESS</button>
-            </form>
-            <div *ngIf="!!myGamePlayer.hasGuessedCorrectly">
-                You guessed correctly!
             </div>
         </div>
     </div>

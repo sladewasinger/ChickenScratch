@@ -11,9 +11,9 @@ namespace ChickenScratch.Services
         private readonly LobbyStateManager lobbyStateManager;
         private readonly LobbyRepository lobbyRepository;
         private readonly PlayerRepository playerRepository;
-        private readonly GameManager gameManager;
+        private readonly GameLogicInvoker gameManager;
 
-        public LobbyHub(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameManager gameManager)
+        public LobbyHub(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameLogicInvoker gameManager)
         {
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
             this.lobbyRepository = lobbyRepository ?? throw new ArgumentNullException(nameof(lobbyRepository));

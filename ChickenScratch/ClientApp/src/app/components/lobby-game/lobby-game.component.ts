@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { Point } from 'src/app/models/point';
 import { Subscription } from 'rxjs';
 import { LobbyState } from 'src/app/models/lobbyState';
@@ -18,12 +18,12 @@ import { BlackBrush, Brush, Eraser } from 'src/app/models/brushes/brushes';
   styleUrls: ['./lobby-game.component.scss']
 })
 export class LobbyGameComponent implements OnInit {
-  drawing = false;
-  canvas: HTMLCanvasElement;
-  mouseCanvas: HTMLCanvasElement;
-  mousePos = new Point(0, 0);
-  oldMousePos = new Point(0, 0);
+  @ViewChild("canvas", {static: false}) canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild("mouseCanvas", {static: false}) mouseCanvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild("chatLog", {static: false}) chatLog: ElementRef<HTMLElement>;
   @ViewChild("imgContainer") imageContainer;
+
+  mousePos = new Point(0, 0);
 
   subs: Subscription[] = [];
 
@@ -53,6 +53,10 @@ export class LobbyGameComponent implements OnInit {
 
   get guess() {
     return this.guessForm?.get('guess');
+  }
+  
+  get activePlayer() {
+    return this.gameState?.activePlayer;
   }
 
   get gamePlayers() {
@@ -88,10 +92,14 @@ export class LobbyGameComponent implements OnInit {
         if (this.gameState.startOfNewRound) {
           document.body.style.backgroundColor = "#bbF";
           setTimeout(() => document.body.style.backgroundColor = "#FFF", 1000);
+          this.switchToBlackBrush();
         }
       }),
       this.hubSocketService.listenOn<void>("Clear").subscribe(x => {
         this.onClearRequestReceived();
+      }),
+      this.hubSocketService.listenOn<string>("Chat").subscribe(x => {
+        this.onChatMessagedReceived(x);
       })
     );
 
@@ -114,31 +122,31 @@ export class LobbyGameComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    this.mouseCanvas = document.getElementById("mouseCanvas") as HTMLCanvasElement;
+    //this.canvas.nativeElement = document.getElementById("canvas") as HTMLCanvasElement;
+    //this.mouseCanvas.nativeElement = document.getElementById("mouseCanvas") as HTMLCanvasElement;
 
-    this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
+    this.canvas.nativeElement.addEventListener("mousedown", this.onMouseDown.bind(this));
     window.addEventListener("mouseup", this.onMouseUp.bind(this));
-    this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.canvas.addEventListener("mouseout", this.onMouseOut.bind(this));
+    this.canvas.nativeElement.addEventListener("mousemove", this.onMouseMove.bind(this));
+    this.canvas.nativeElement.addEventListener("mouseout", this.onMouseOut.bind(this));
 
     // Set up touch events for mobile
-    this.canvas.addEventListener("touchstart", (e) => {
+    this.canvas.nativeElement.addEventListener("touchstart", (e) => {
       var touch = e.touches[0];
       var mouseEvent = new MouseEvent("mousedown", {
         clientX: touch.clientX,
         clientY: touch.clientY
       });
-      this.canvas.dispatchEvent(mouseEvent);
+      this.canvas.nativeElement.dispatchEvent(mouseEvent);
       e.preventDefault();
     }, false);
-    this.canvas.addEventListener("touchend", (e) => {
+    this.canvas.nativeElement.addEventListener("touchend", (e) => {
       var mouseEvent = new MouseEvent("mouseup", {});
-      this.canvas.dispatchEvent(mouseEvent);
+      this.canvas.nativeElement.dispatchEvent(mouseEvent);
       window.dispatchEvent(mouseEvent);
       e.preventDefault();
     }, false);
-    this.canvas.addEventListener("touchmove", (e) => {
+    this.canvas.nativeElement.addEventListener("touchmove", (e) => {
       var touch = e.touches[0];
       var mouseEvent = new MouseEvent(
         'mousemove',
@@ -157,7 +165,7 @@ export class LobbyGameComponent implements OnInit {
       touch.target.dispatchEvent(mouseEvent);
       e.preventDefault();
     }, false);
-    this.canvas.onselectstart = () => false;
+    this.canvas.nativeElement.onselectstart = () => false;
 
     this.switchToBlackBrush();
   }
@@ -178,8 +186,8 @@ export class LobbyGameComponent implements OnInit {
   }
 
   private clearCanvas() {
-    var ctx = this.canvas.getContext("2d");
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    var ctx = this.canvas.nativeElement.getContext("2d");
+    ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
   async onClearRequestReceived() {
@@ -192,10 +200,19 @@ export class LobbyGameComponent implements OnInit {
     }
   }
 
+  async onChatMessagedReceived(chatMsg: string) {
+    const span = document.createElement("SPAN");
+    span.innerText = chatMsg;
+    span.className = "chat-msg";
+    span.style.display = "block";
+    span.style.whiteSpace = "nowrap";
+    this.chatLog.nativeElement.appendChild(span);
+  }
+
   sendClear() {
-    var ctx = this.canvas.getContext("2d");
+    var ctx = this.canvas.nativeElement.getContext("2d");
     ctx.fillStyle = "#F00";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
     ctx.closePath();
 
     this.clearCanvas();
@@ -204,11 +221,11 @@ export class LobbyGameComponent implements OnInit {
   }
 
   switchToBlackBrush() {
-    this.currentBrush = new BlackBrush(this.canvas, this.mouseCanvas);
+    this.currentBrush = new BlackBrush(this.canvas.nativeElement, this.mouseCanvas.nativeElement);
   }
 
   switchToEraser() {
-    this.currentBrush = new Eraser(this.canvas, this.mouseCanvas);
+    this.currentBrush = new Eraser(this.canvas.nativeElement, this.mouseCanvas.nativeElement);
   }
 
   async guessFormSubmit() {
@@ -224,8 +241,6 @@ export class LobbyGameComponent implements OnInit {
   }
 
   onMouseMove(e: MouseEvent) {
-    this.oldMousePos.x = this.mousePos.x;
-    this.oldMousePos.y = this.mousePos.y;
     this.mousePos.x = e.offsetX;
     this.mousePos.y = e.offsetY;
 
@@ -253,7 +268,7 @@ export class LobbyGameComponent implements OnInit {
   }
 
   doSend() {
-    var canvasDataURL = this.canvas.toDataURL(); // this.canvas.toDataURL('image/jpeg', 0.6);
+    var canvasDataURL = this.canvas.nativeElement.toDataURL(); // this.canvas.toDataURL('image/jpeg', 0.6);
     let data = {
       imageBase64: canvasDataURL
     };

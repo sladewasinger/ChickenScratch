@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static ChickenScratch.Hubs.GameManager;
+using static ChickenScratch.Hubs.GameLogicInvoker;
 using static ChickenScratchEngine.GameEngine;
 
 namespace ChickenScratch.Hubs
@@ -23,6 +23,7 @@ namespace ChickenScratch.Hubs
         private readonly LobbyStateManager lobbyStateManager;
         private readonly LobbyRepository lobbyRepository;
         private readonly PlayerRepository playerRepository;
+        private readonly ChatQueue chatQueue;
 
         public GameLogic(
             HubSocketContext context,
@@ -30,6 +31,7 @@ namespace ChickenScratch.Hubs
             LobbyStateManager lobbyStateManager,
             LobbyRepository lobbyRepository,
             PlayerRepository playerRepository,
+            ChatQueue chatQueue,
             Player player,
             Lobby lobby)
         {
@@ -38,6 +40,7 @@ namespace ChickenScratch.Hubs
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
             this.lobbyRepository = lobbyRepository ?? throw new ArgumentNullException(nameof(lobbyRepository));
             this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            this.chatQueue = chatQueue ?? throw new ArgumentNullException(nameof(chatQueue));
             this.player = player;
             this.lobby = lobby;
         }
@@ -115,11 +118,24 @@ namespace ChickenScratch.Hubs
         [NeedsGameInProgress]
         public HubResponse Guess(string guess)
         {
+            if (string.IsNullOrEmpty(guess))
+            {
+                return HubResponse
+                    .Error("Guess was empty!");
+            }
+
             bool correctGuess = lobby.Engine.GuessWord(lobby.Engine.GetGamePlayer(player.ID), guess);
             if (!correctGuess)
             {
+                string msg = $"{player.Name}: {guess}";
+                chatQueue.LogChatMessage(msg);
+                Clients.SendToClients("Chat", lobby.Players.Select(x => x.ConnectionId), msg);
                 return HubResponse<bool>.Success(false);
             }
+
+            string msg2 = $"Player '{player.Name}' correctly guessed the word!";
+            chatQueue.LogChatMessage(msg2);
+            Clients.SendToClients("Chat", lobby.Players.Select(x => x.ConnectionId), msg2);
 
             OnGameStateUpdated(lobby);
             return HubResponse<bool>.Success(true);

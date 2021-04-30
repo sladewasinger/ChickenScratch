@@ -1,10 +1,40 @@
 .canvas-container {
     position: relative;
-    border: 5px solid blue;
+    border: 5px solid #777;
     width: 500px;
     height: 400px;
     box-sizing: content-box;
     user-select: none;
+}
+
+.canvas-container-active {
+    border-color: blue;
+}
+
+.title-row {
+    padding-bottom: 40px;
+}
+
+.current-word {
+    font-size: 1.75em;
+    font-weight: bold;
+}
+
+.player-list {
+    font-size: 2em;
+
+    .active-player {
+        background-color: rgba(220,220,0,0.5);
+    }
+
+    .score {
+        font-size: 0.6em;
+        font-family: 'Courier New', Courier, monospace;
+    }
+}
+
+.guess-form {
+    width: 500px;
 }
 
 #mouseCanvas {

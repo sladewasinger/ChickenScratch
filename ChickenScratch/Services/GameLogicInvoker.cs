@@ -9,21 +9,23 @@ using System.Threading.Tasks;
 
 namespace ChickenScratch.Hubs
 {
-    public class GameManager
+    public class GameLogicInvoker
     {
         private MethodInfo[] gameMethods;
 
         private readonly LobbyStateManager lobbyStateManager;
         private readonly LobbyRepository lobbyRepository;
         private readonly PlayerRepository playerRepository;
+        private readonly ChatQueue chatQueue;
 
-        public GameManager(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository)
+        public GameLogicInvoker(LobbyStateManager lobbyStateManager, LobbyRepository lobbyRepository, PlayerRepository playerRepository, ChatQueue chatQueue)
         {
             gameMethods = typeof(GameLogic).GetMethods();
 
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
             this.lobbyRepository = lobbyRepository ?? throw new ArgumentNullException(nameof(lobbyRepository));
             this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            this.chatQueue = chatQueue ?? throw new ArgumentNullException(nameof(chatQueue));
         }
 
         public async Task<HubResponse> CallMethod(string methodName, HubSocketContext context, HubSocketClients clients, params object[] methodParameters)
@@ -83,15 +85,15 @@ namespace ChickenScratch.Hubs
                 lobbyStateManager,
                 lobbyRepository,
                 playerRepository,
+                chatQueue,
                 player,
                 lobby);
-
 
             object invokeResult = gameMethod.Invoke(gameLogic, methodParameters);
             HubResponse returnResult;
             if (invokeResult is Task)
             {
-                returnResult = await ((Task<HubResponse>)invokeResult);
+                returnResult = await (Task<HubResponse>)invokeResult;
             }
             else
             {
