@@ -55,8 +55,8 @@ export class BlackBrush extends Brush {
     onMouseMove(mousePos: Point) {
         this.prevMousePos = this.mousePos;
         this.mousePos = mousePos;
+
         if (this.mouseDown) {
-            console.log("Pushing: " + mousePos.x + "," + mousePos.y);
             this.line.push(new Point(mousePos.x, mousePos.y));
         }
 
@@ -81,6 +81,10 @@ export class BlackBrush extends Brush {
         this.mouseDown = false;
         this.line = [];
         //this.drawBrushStroke(this.mousePos);
+    }
+
+    onMouseOut() {
+        this.onMouseUp();
     }
 
     private drawLoop() {
@@ -123,11 +127,8 @@ export class BlackBrush extends Brush {
             return;
         }
 
-        console.log("drawing a line!", this.line);
         var startPoint = this.line[0];
         var endPoint = this.line[this.line.length - 1];
-
-        console.log(startPoint, endPoint);
 
         var ctx = this.canvas.getContext("2d");
         ctx.imageSmoothingEnabled = true;
@@ -144,7 +145,7 @@ export class BlackBrush extends Brush {
         }
         ctx.lineTo(endPoint.x, endPoint.y);
         ctx.stroke();
-        this.line = [];
+        this.line = [endPoint];
     }
 }
 
