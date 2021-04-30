@@ -20,6 +20,11 @@
     font-weight: bold;
 }
 
+.chat-log {
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
 .player-list {
     font-size: 2em;
 

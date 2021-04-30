@@ -22,7 +22,56 @@ namespace ChickenScratchEngine
 
         private static IReadOnlyList<string> readonlyWords = new List<string>()
         {
-            "world", "pizza", "pie", "umbrella", "elbow", "smile", "chapstick", "headphones", "keyboard"
+            "state",
+            "stomach",
+            "bacteria",
+            "shoulder",
+            "window",
+            "merry-go-round",
+            "orange",
+            "teacher",
+            "teapot",
+            "pool",
+            "hair dryer",
+            "lap",
+            "bathtub",
+            "snow",
+            "battery",
+            "paper clips",
+            "library",
+            "frying pan",
+            "positive",
+            "broccoli",
+            "pajamas",
+            "claw",
+            "gum",
+            "tuba",
+            "music",
+            "shade",
+            "dinner",
+            "electricity",
+            "fork",
+            "cocoon",
+            "anvil",
+            "lighthouse",
+            "plant",
+            "parka",
+            "stick",
+            "clownfish",
+            "gasoline",
+            "loaf",
+            "pineapple",
+            "sailboat",
+            "newlywed",
+            "carpet",
+            "skate",
+            "inch",
+            "enter",
+            "front porch",
+            "ladybug",
+            "canoe",
+            "mattress",
+            "desert"
         };
         private List<string> words = new List<string>(readonlyWords);
 
@@ -100,7 +149,7 @@ namespace ChickenScratchEngine
 
 
             /* Reset game state to fresh round state */
-            foreach(var player in gameState.Players)
+            foreach (var player in gameState.Players)
             {
                 player.HasGuessedCorrectly = false;
             }
@@ -121,7 +170,7 @@ namespace ChickenScratchEngine
                 {
                     gamePlayer.Score += Math.Max(10, 100 - Math.Max(0, 10 * gameState.Players.Count(x => x.HasGuessedCorrectly)));
                     gamePlayer.HasGuessedCorrectly = true;
-                    gameState.ActivePlayer.Score += (int)Math.Ceiling(100.00 / (gameState.Players.Count()-1));
+                    gameState.ActivePlayer.Score += (int)Math.Ceiling(100.00 / (gameState.Players.Count() - 1));
                 }
 
                 if (gameState.Players
