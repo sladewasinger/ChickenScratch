@@ -118,7 +118,7 @@ namespace ChickenScratch.Hubs
         [NeedsGameInProgress]
         public HubResponse Guess(string guess)
         {
-            if (string.IsNullOrEmpty(guess))
+            if (string.IsNullOrWhiteSpace(guess))
             {
                 return HubResponse
                     .Error("Guess was empty!");

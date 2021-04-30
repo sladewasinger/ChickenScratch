@@ -93,6 +93,7 @@ export class LobbyGameComponent implements OnInit {
           document.body.style.backgroundColor = "#bbF";
           setTimeout(() => document.body.style.backgroundColor = "#FFF", 1000);
           this.switchToBlackBrush();
+          this.clearCanvas();
         }
       }),
       this.hubSocketService.listenOn<void>("Clear").subscribe(x => {
@@ -206,8 +207,8 @@ export class LobbyGameComponent implements OnInit {
     span.className = "chat-msg";
     span.style.display = "block";
     span.style.whiteSpace = "nowrap";
-    this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
     this.chatLog.nativeElement.appendChild(span);
+    this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
   }
 
   sendClear() {

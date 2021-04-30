@@ -71,7 +71,56 @@ namespace ChickenScratchEngine
             "ladybug",
             "canoe",
             "mattress",
-            "desert"
+            "desert",
+            "monkey",
+            "lemon",
+            "triangle",
+            "blanket",
+            "rain",
+            "swing",
+            "cat",
+            "hat",
+            "lizard",
+            "ladybug",
+            "bear",
+            "oval",
+            "balloon",
+            "ants",
+            "bow",
+            "basketball",
+            "crayon",
+            "stairs",
+            "backpack",
+            "turtle",
+            "line",
+            "smile",
+            "cookie",
+            "mitten",
+            "sunglasses",
+            "neck",
+            "box",
+            "diamond",
+            "bee",
+            "river",
+            "Mickey Mouse",
+            "socks",
+            "man",
+            "cherry",
+            "apple",
+            "zebra",
+            "nose",
+            "leaf",
+            "snowflake",
+            "bracelet",
+            "football",
+            "cheese",
+            "jar",
+            "baseball",
+            "branch",
+            "bone",
+            "jellyfish",
+            "king",
+            "swimming pool"
         };
         private List<string> words = new List<string>(readonlyWords);
 
@@ -164,7 +213,9 @@ namespace ChickenScratchEngine
 
         public bool GuessWord(GamePlayer gamePlayer, string word)
         {
-            if (word.ToLower() == gameState.CurrentWord.ToLower())
+            word = word.Replace(" ", string.Empty).ToLower();
+            string currentWord = gameState.CurrentWord.Replace(" ", string.Empty).ToLower();
+            if (word == currentWord)
             {
                 if (!gamePlayer.HasGuessedCorrectly)
                 {
