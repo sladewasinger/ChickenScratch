@@ -31,6 +31,7 @@ From the commandline:
 - **.../ChickenScratch/ChickenScratch/**:
   - `dotnet restore` (first time only)
   - `dotnet watch run`
+  - This might open up a website at https://localhost - ignore this page.
 - **.../ChickenScratch/ChickenScratch/chicken-scratch-app**:
   - `npm install` (first time only)
   - `npm run start-local`
