@@ -24,8 +24,6 @@ Right now you can open as many tabs as you want and connect them to the server. 
 
 # How to Run:
 
-- Follow these instructions for SSL cert setup: https://medium.com/@rubenvermeulen/running-angular-cli-over-https-with-a-trusted-certificate-4a0d5f92747a
-
 From the commandline:
 
 - **.../ChickenScratch/ChickenScratch/**:
@@ -36,3 +34,10 @@ From the commandline:
   - `npm install` (first time only)
   - `npm run start-local`
 - Navigate to https://localhost:4201
+
+# SSL Errors
+
+If you receive an error in Chrome stating the certificate is not valid, then you need to trust the ssl.crt cert that is in the ChickenScratch\ClientApp\ssl\ folder.  
+Open that folder up in file explorer, double click the servert.crt, and install/trust it.
+
+If you're having issues, you can follow the directions listed here: https://medium.com/@rubenvermeulen/running-angular-cli-over-https-with-a-trusted-certificate-4a0d5f92747a
