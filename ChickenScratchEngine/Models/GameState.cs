@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ChickenScratchEngine.Models
 {
@@ -8,5 +9,6 @@ namespace ChickenScratchEngine.Models
         public GamePlayer ActivePlayer { get; set; }
         public string CurrentWord { get; set; }
         public bool StartOfNewRound { get; set; }
+        public DateTime TimeOfRoundEnd { get; set; }
     }
 }
