@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start-local": "ng serve --ssl true --ssl-cert ssl/server.crt --ssl-key ssl/server.key --port 4201",
+    "start-local": "ng serve --ssl true --ssl-cert ssl/server.crt --ssl-key ssl/server.key --host 0.0.0.0 --port 4201 --disable-host-check",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
