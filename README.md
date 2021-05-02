@@ -29,9 +29,10 @@ From the commandline:
 - **.../ChickenScratch/ChickenScratch/chicken-scratch-app**:
   - `npm install` (first time only)
   - `npm run start-local`
-- **.../ChickenScratch/ChickenScratch/**:
+- **.../ChickenScratch/**:
   - `dotnet restore` (first time only)
-  - `dotnet watch run`
+  - `dotnet watch run --urls https://0.0.0.0 --project=ChickenScratch `
+  - (The --urls https://0.0.0.0 allows other devices on local network to access kestrel)
 - Navigate to https://localhost:4201
 
 # SSL Errors

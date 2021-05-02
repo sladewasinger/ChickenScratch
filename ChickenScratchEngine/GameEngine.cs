@@ -1,4 +1,5 @@
-﻿using ChickenScratchEngine.Extensions;
+﻿using AutoMapper;
+using ChickenScratchEngine.Extensions;
 using ChickenScratchEngine.Models;
 using System;
 using System.Collections.Generic;
@@ -152,6 +153,8 @@ namespace ChickenScratchEngine
             gameTimer.Interval = timerInterval.TotalMilliseconds;
             gameTimer.Elapsed += (s, e) => TimerExpired();
             gameTimer.AutoReset = false;
+
+            gameState.TimeOfRoundEnd = DateTime.UtcNow.Add(timerInterval);
             gameTimer.Start();
 
             OnGameStateUpdated(EventArgs.Empty);
@@ -204,6 +207,7 @@ namespace ChickenScratchEngine
             }
 
             gameState.StartOfNewRound = true;
+            gameState.TimeOfRoundEnd = DateTime.UtcNow.Add(timerInterval);
             OnGameStateUpdated(new GameStateUpdatedArgs() { GameState = gameState });
             gameState.StartOfNewRound = false;
 
@@ -279,13 +283,15 @@ namespace ChickenScratchEngine
                 return gameState;
             }
 
-            return new GameState()
-            {
-                ActivePlayer = gameState.ActivePlayer,
-                CurrentWord = "",
-                Players = gameState.Players,
-                StartOfNewRound = gameState.StartOfNewRound
-            };
+            var config = new MapperConfiguration(cfg => {
+                cfg.CreateMap<GameState, GameState>();
+            });
+            IMapper iMapper = config.CreateMapper();
+
+            GameState playerGameState = iMapper.Map<GameState>(gameState);
+            playerGameState.CurrentWord = "";
+
+            return playerGameState;
         }
     }
 }

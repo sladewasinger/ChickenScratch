@@ -4,7 +4,8 @@ export interface GameState {
     players: GamePlayer[],
     activePlayer: GamePlayer,
     currentWord: string,
-    startOfNewRound: boolean
+    startOfNewRound: boolean,
+    timeOfRoundEnd: Date
 }
 
 export interface GamePlayer {

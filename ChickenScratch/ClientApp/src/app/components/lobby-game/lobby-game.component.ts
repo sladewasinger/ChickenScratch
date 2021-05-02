@@ -35,6 +35,8 @@ export class LobbyGameComponent implements OnInit {
 
   currentBrush: BaseBrush;
 
+  secondsLeft: string;
+
   get lobby(): Lobby {
     return this.lobbyState?.lobbies
       .find(l => l.players.some(p => p.connectionId == this.hubSocketService.ConnectionId));
@@ -121,6 +123,20 @@ export class LobbyGameComponent implements OnInit {
     this.guessForm = this.formBuilder.group({
       guess: new FormControl('', [Validators.required, Validators.minLength(1)])
     });
+
+    setInterval(this.setSecondsLeft.bind(this), 500);
+  }
+
+  setSecondsLeft() {
+    if (!this.gameState || !new Date(this.gameState.timeOfRoundEnd)) {
+      this.secondsLeft = "unknown";
+      return;
+    }
+    let seconds = (new Date(this.gameState.timeOfRoundEnd).getTime() - new Date().getTime()) / 1000;
+    seconds = seconds - 0.5;
+    seconds = Math.round(seconds);
+    seconds = Math.max(0, seconds);
+    this.secondsLeft = seconds.toString();
   }
 
   ngAfterViewInit() {
