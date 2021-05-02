@@ -12,5 +12,10 @@ namespace ChickenScratch.Repositories
             player = GetAll().SingleOrDefault(p => p.ConnectionId == connectionId);
             return player != null;
         }
+
+        public int Count()
+        {
+            return GetAll().Count();
+        }
     }
 }

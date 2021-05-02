@@ -1,4 +1,5 @@
-﻿using ChickenScratchEngine;
+﻿using ChickenScratch.Extensions;
+using ChickenScratchEngine;
 using ChickenScratchEngine.Extensions;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,7 @@ namespace ChickenScratch.Models
 
         public Lobby()
         {
-            Key = GenerateKey();
-        }
-
-        private string GenerateKey()
-        {
-            char[] letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
-            return new string(Enumerable.Repeat(letters, 4).Select(s => s[StaticRandom.Random.Next(0, letters.Length)]).ToArray());
+            Key = LobbyExtensions.GenerateKey();
         }
     }
 }

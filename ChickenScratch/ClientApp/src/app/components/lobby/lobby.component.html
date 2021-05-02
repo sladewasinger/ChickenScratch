@@ -1,18 +1,28 @@
-<h3 *ngIf="!lobby">NO LOBBY</h3>
-<div *ngIf="lobbyState && lobby && myPlayer">
-    <div>
-        <h3>Lobby: {{ lobby.key }}</h3>
-        <div *ngIf="!gameState">
-            <div *ngIf="lobby.lobbyLeader.id == myPlayer.id">
-                <button (click)="startGame()">START GAME</button>
+<h3 *ngIf="!lobby">ERROR: NO LOBBY!</h3>
+<div class="container" *ngIf="!gameState">
+    <div class="card" *ngIf="lobbyState && lobby && myPlayer">
+        <div class="card-body">
+            <div class="card-title">
+                <h3>
+                    Lobby: {{ lobby.key }}
+                    <button *ngIf="lobby.lobbyLeader.id == myPlayer.id" class="btn btn-primary" (click)="startGame()"
+                        style="float: right">
+                        START GAME
+                    </button>
+                </h3>
             </div>
-            <ol>
-                <li *ngFor="let player of players">{{ player.name }}</li>
-            </ol>
+            <div>
+                <h5>Players in Lobby:</h5>
+                <ol>
+                    <li *ngFor="let player of players">
+                        {{ player.name }}
+                        <span *ngIf="lobby.lobbyLeader.id == player.id">- Lobby Leader</span>
+                    </li>
+                </ol>
+            </div>
         </div>
     </div>
 </div>
 
 <app-lobby-game *ngIf="lobby.gameRunning">
-    TEST
 </app-lobby-game>

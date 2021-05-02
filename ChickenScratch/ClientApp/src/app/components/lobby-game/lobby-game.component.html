@@ -33,32 +33,44 @@
         <div class="col-sm-2"></div>
         <div class="col-sm-7 d-flex justify-content-center" *ngIf="gameState">
             <div *ngIf="myTurn" class="controls">
-                <button class="btn btn-danger" (click)="sendClear()">CLEAR</button>
+                <button class="btn btn-danger" (click)="sendClear()">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
                 <button class="btn btn-outline-dark large-font" (click)="switchToEraser()">
                     <i class="fas fa-eraser"></i>
                 </button>
                 <button class="btn btn-outline-dark large-font" (click)="switchToBlackBrush()">
                     <i class="fas fa-paint-brush"></i>
                 </button>
-                <input type="color" id="head" name="head" value="#000" />
             </div>
-            <div class="row" *ngIf="guessForm && !myTurn">
-                <div class="col-sm">
-                    <form [formGroup]="guessForm" *ngIf="!myGamePlayer.hasGuessedCorrectly"
-                        (ngSubmit)="guessFormSubmit()" autocomplete="off" class="guess-form">
-                        <div class="form-group">
-                            <label for="guess">Guess the word:</label>
-                            <input type="text" class="form-control" id="guess" formControlName="guess"
-                                placeholder="Enter your guess" required maxlength="50" />
-                        </div>
-                        <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">
-                            GUESS
-                        </button>
-                    </form>
-                    <div *ngIf="!!myGamePlayer.hasGuessedCorrectly">
-                        You guessed correctly!
+            <div *ngIf="guessForm && !myTurn">
+                <form [formGroup]="guessForm" *ngIf="!myGamePlayer.hasGuessedCorrectly" (ngSubmit)="guessFormSubmit()"
+                    autocomplete="off" class="guess-form">
+                    <div class="form-group">
+                        <label for="guess">Guess the word:</label>
+                        <input type="text" class="form-control" id="guess" formControlName="guess"
+                            placeholder="Enter your guess" required maxlength="50" />
                     </div>
+                    <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">
+                        GUESS
+                    </button>
+                </form>
+                <div *ngIf="!!myGamePlayer.hasGuessedCorrectly">
+                    You guessed correctly!
                 </div>
+            </div>
+        </div>
+        <div class="col-sm-3"></div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-7 d-flex justify-content-center" *ngIf="gameState">
+            <div *ngIf="myTurn" class="controls">
+                <button class="btn btn-outline-dark black-bg circle-btn" (click)="setColor('#000')"></button>
+                <button class="btn btn-outline-dark blue-bg circle-btn" (click)="setColor('blue')"></button>
+                <button class="btn btn-outline-dark red-bg circle-btn" (click)="setColor('red')"></button>
+                <button class="btn btn-outline-dark green-bg circle-btn" (click)="setColor('green')"></button>
+                <button class="btn btn-outline-dark yellow-bg circle-btn" (click)="setColor('#F2F200')"></button>
             </div>
         </div>
         <div class="col-sm-3"></div>

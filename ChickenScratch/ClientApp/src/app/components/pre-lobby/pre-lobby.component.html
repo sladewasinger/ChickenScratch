@@ -10,7 +10,12 @@
         </div>
     </div>
 </div>
-<div *ngIf="connected">
+<div class="container" *ngIf="connected">
+    <div class="row">
+        <div class="col-sm">
+            There are currently {{ totalPlayerCount }} players online.
+        </div>
+    </div>
     <div class="row" *ngIf="!myPlayer">
         <div class="col-sm">
             <div class="card">
@@ -21,12 +26,6 @@
                             <label for="playerName">Username:</label>
                             <input type="text" class="form-control" id="playerName" formControlName="playerName"
                                 placeholder="Enter username" required>
-                            <div class="valid-tooltip">
-                                Looks good!
-                            </div>
-                            <div class="invalid-tooltip">
-                                Please choose a unique and valid username.
-                            </div>
                             <div *ngIf="playerName.invalid && (playerName.dirty || playerName.touched)"
                                 class="alert alert-danger">
                                 <div *ngIf="playerName.errors.minlength || playerName.errors.required">
@@ -34,7 +33,9 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">JOIN</button>
+                        <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">
+                            Create Player
+                        </button>
                     </form>
                 </div>
             </div>
@@ -53,18 +54,18 @@
                             <div *ngIf="lobbyKey && lobbyKey.invalid && (lobbyKey.dirty || lobbyKey.touched)"
                                 class="alert alert-danger">
                                 <div *ngIf="lobbyKey.errors.minlength || lobbyKey.errors.required">
-                                    Name is required
+                                    Lobby Code is required
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" [disabled]="lobbyKey.invalid">JOIN</button>
+                        <button type="submit" class="btn btn-success" [disabled]="lobbyKey.invalid">JOIN</button>
                     </form>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Create Lobby</h5>
-                    <button type="submit" class="btn btn-primary" (click)="createLobby()">Create Lobby</button>
+            <div class="card justify-content-center align-items-center">
+                <div class="text-center">
+                    <h4 class="card-title">or Create Your Own Lobby</h4>
+                    <button type="submit" class="btn btn-warning" (click)="createLobby()">Create Lobby</button>
                 </div>
             </div>
         </div>

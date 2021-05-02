@@ -11,11 +11,16 @@ import { Router } from '@angular/router';
 export class LobbyStateService {
   private myPlayerStream = new ReplaySubject<Player>(1);
   private lobbyStateStream = new ReplaySubject<LobbyState>(1);
+  private isInLobby = false;
 
   constructor(private hubSocketService: HubSocketService,
     private router: Router) {
     this.hubSocketService.listenOn<LobbyState>("LobbyStateUpdated").subscribe(x => this.updateLobbyState(x));
     this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x));
+  }
+
+  get PlayerIsInLobby() {
+    return this.isInLobby;
   }
 
   getLobbyState(): Observable<LobbyState> {
@@ -34,10 +39,12 @@ export class LobbyStateService {
     console.log("Lobby service - hub disconnected");
     this.updateMyPlayer(null);
     this.updateLobbyState(null);
+    this.isInLobby = false;
     this.router.navigate(['']);
   }
 
   private updateLobbyState(lobbyState: LobbyState) {
+    this.isInLobby = true;
     this.lobbyStateStream.next(lobbyState);
   }
 }
