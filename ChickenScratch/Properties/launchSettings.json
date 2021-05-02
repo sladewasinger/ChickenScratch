@@ -3,7 +3,7 @@
     "ChickenScratch": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:4201",
+      "applicationUrl": "https://localhost:443",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

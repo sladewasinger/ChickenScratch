@@ -136,8 +136,13 @@ export class LobbyGameComponent implements OnInit {
     this.canvas.nativeElement.addEventListener("touchstart", (e) => {
       var touch = e.touches[0];
       var mouseEvent = new MouseEvent("mousedown", {
-        clientX: touch.clientX,
-        clientY: touch.clientY
+        'view': (event.target as any).ownerDocument.defaultView,
+        'bubbles': true,
+        'cancelable': true,
+        'screenX': touch.screenX,  // get the touch coords 
+        'screenY': touch.screenY,  // and add them to the 
+        'clientX': touch.clientX,  // mouse event
+        'clientY': touch.clientY
       });
       this.canvas.nativeElement.dispatchEvent(mouseEvent);
       e.preventDefault();
@@ -277,7 +282,7 @@ export class LobbyGameComponent implements OnInit {
     if (this.myTurn) {
       this.mousePos.x = e.offsetX;
       this.mousePos.y = e.offsetY;
-      this.currentBrush.onMouseDown(this.mousePos);
+      this.currentBrush.onMouseDown(new Point(this.mousePos.x, this.mousePos.y));
     }
   }
 

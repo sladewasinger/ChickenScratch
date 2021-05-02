@@ -68,6 +68,7 @@ export class SolidBrush extends BaseBrush {
     }
 
     onMouseDown(mousePos: Point) {
+        this.mousePos = new Point(mousePos.x, mousePos.y);
         this.mouseDown = true;
         this.line = [];
         this.line.push(new Point(mousePos.x, mousePos.y));
@@ -78,7 +79,6 @@ export class SolidBrush extends BaseBrush {
             return;
         }
         this.mouseDown = false;
-
         this.line = [];
     }
 
@@ -155,7 +155,7 @@ export class Eraser extends SolidBrush {
     constructor(canvas: HTMLCanvasElement,
         mouseCanvas: HTMLCanvasElement) {
         super(canvas, mouseCanvas);
-        this.brushRadius = 10;
+        this.brushRadius = 15;
         this.brushColor = "#FFF";
     }
 
