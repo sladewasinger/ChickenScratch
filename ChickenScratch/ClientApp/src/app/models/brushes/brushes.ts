@@ -2,7 +2,7 @@ import { Point } from '../point';
 import { GameState } from '../gameState';
 import { CONTEXT_NAME } from '@angular/compiler/src/render3/view/util';
 
-export class Brush {
+export class BaseBrush {
     canvas: HTMLCanvasElement;
     mouseCanvas: HTMLCanvasElement;
     mouseDown: boolean;
@@ -14,6 +14,10 @@ export class Brush {
         mouseCanvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.mouseCanvas = mouseCanvas;
+    }
+
+    setColor(cssColor: string) {
+        this.brushColor = cssColor;
     }
 
     onMouseMove(mousePos: Point) {
@@ -35,7 +39,7 @@ export class Brush {
     }
 }
 
-export class BlackBrush extends Brush {
+export class SolidBrush extends BaseBrush {
     mousePos: Point;
     prevMousePos: Point;
     line: Point[];
@@ -59,16 +63,9 @@ export class BlackBrush extends Brush {
         if (this.mouseDown) {
             this.line.push(new Point(mousePos.x, mousePos.y));
         }
-
-        // if (this.mouseDown) {
-        //     this.drawBrushStroke();
-        // }
     }
 
     onMouseDown() {
-        // var ctx = this.canvas.getContext("2d");
-        // ctx.moveTo(this.mousePos.x, this.mousePos.y);
-        // ctx.beginPath();
         this.mouseDown = true;
         this.line = [];
         this.line.push(new Point(this.mousePos.x, this.mousePos.y));
@@ -80,7 +77,6 @@ export class BlackBrush extends Brush {
         }
         this.mouseDown = false;
         this.line = [];
-        //this.drawBrushStroke(this.mousePos);
     }
 
     onMouseOut() {
@@ -101,9 +97,11 @@ export class BlackBrush extends Brush {
         mctx.clearRect(0, 0, this.mouseCanvas.width, this.mouseCanvas.height);
         mctx.beginPath();
         mctx.fillStyle = this.brushColor;
+        mctx.strokeStyle = "#000";
         mctx.arc(this.mousePos.x, this.mousePos.y, this.brushRadius, 0, Math.PI * 2, true);
         mctx.closePath();
         mctx.fill();
+        mctx.stroke();
     }
 
     private drawBrushStroke(startingPoint?: Point) {
@@ -149,10 +147,7 @@ export class BlackBrush extends Brush {
     }
 }
 
-export class Eraser extends Brush {
-    mousePos: Point;
-    prevMousePos: Point;
-
+export class Eraser extends SolidBrush {
     constructor(canvas: HTMLCanvasElement,
         mouseCanvas: HTMLCanvasElement) {
         super(canvas, mouseCanvas);
@@ -160,63 +155,7 @@ export class Eraser extends Brush {
         this.brushColor = "#FFF";
     }
 
-    onMouseMove(mousePos: Point) {
-        this.prevMousePos = this.mousePos;
-        this.mousePos = mousePos;
-
-        this.drawBrushCursor();
-
-        if (this.mouseDown) {
-            this.drawBrushStroke();
-        }
-    }
-
-    onMouseDown() {
-        var ctx = this.canvas.getContext("2d");
-        ctx.moveTo(this.mousePos.x, this.mousePos.y);
-        ctx.beginPath();
-
-        this.mouseDown = true;
-    }
-
-    onMouseUp() {
-        this.mouseDown = false;
-        this.drawBrushStroke(this.mousePos);
-    }
-
-    private drawBrushCursor() {
-        var mctx = this.mouseCanvas.getContext("2d");
-        mctx.clearRect(0, 0, this.mouseCanvas.width, this.mouseCanvas.height);
-        mctx.beginPath();
-
-        // /* White Outline */
-        // mctx.strokeStyle = this.brushColor
-        // mctx.lineWidth = 2;
-        // mctx.arc(this.mousePos.x, this.mousePos.y, this.brushRadius + 1, 0, Math.PI * 2, true);
-        // mctx.stroke();
-
-        /* Black InnerOutline */
-        mctx.fillStyle = this.brushColor;
-        mctx.strokeStyle = "#000";
-        mctx.lineWidth = 1;
-        mctx.arc(this.mousePos.x, this.mousePos.y, this.brushRadius, 0, Math.PI * 2, true);
-        mctx.fill();
-        mctx.stroke();
-    }
-
-    private drawBrushStroke(startingPoint?: Point) {
-        var ctx = this.canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = this.brushColor;
-        ctx.lineWidth = this.brushRadius * 2;
-        ctx.lineJoin = 'round';
-
-        if (!!startingPoint) {
-            ctx.moveTo(this.prevMousePos.x, this.prevMousePos.y);
-        }
-
-        ctx.lineTo(this.mousePos.x, this.mousePos.y);
-        ctx.stroke();
+    setColor() {
+        return; // Disallow setting color for eraser
     }
 }

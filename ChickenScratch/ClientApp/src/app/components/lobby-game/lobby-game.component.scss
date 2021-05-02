@@ -1,92 +1,118 @@
 .canvas-container {
-    position: relative;
-    border: 5px solid #777;
-    width: 500px;
-    height: 400px;
-    box-sizing: content-box;
-    user-select: none;
+  position: relative;
+  background-color: #fff;
+  border: 5px solid #777;
+  width: 500px;
+  height: 400px;
+  box-sizing: content-box;
+  user-select: none;
 }
 
 .canvas-container-active {
-    border-color: blue;
+  border-color: blue;
 }
 
 .title-row {
-    padding-bottom: 40px;
+  padding-bottom: 40px;
 }
 
 .current-word {
-    font-size: 1.75em;
-    font-weight: bold;
+  font-size: 1.75em;
+  font-weight: bold;
 }
 
 .chat-log {
-    max-height: 400px;
-    overflow-y: scroll;
+  max-height: 400px;
+  overflow-y: scroll;
 }
 
 .player-list {
-    font-size: 2em;
+  font-size: 2em;
 
-    .active-player {
-        background-color: rgba(220,220,0,0.5);
-    }
+  .active-player {
+    background-color: rgba(220, 220, 0, 0.5);
+  }
 
-    .score {
-        font-size: 0.6em;
-        font-family: 'Courier New', Courier, monospace;
-    }
+  .score {
+    font-size: 0.6em;
+    font-family: "Courier New", Courier, monospace;
+  }
 }
 
 .guess-form {
-    width: 500px;
+  width: 500px;
 }
 
 #mouseCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    box-sizing: border-box;
-    z-index: 100;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  z-index: 100;
+  pointer-events: none;
 }
 
 #canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    box-sizing: border-box;
-    z-index: 10;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  z-index: 10;
 }
 
 .image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  img {
     position: absolute;
     top: 0;
     left: 0;
-
-    img {
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
+  }
 }
 
 .circle {
-    background-color: #000;
-    border: 2px solid #fff;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
+  background-color: #000;
+  border: 2px solid #fff;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
 }
 
 .large-font {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .controls {
-    display: flex;
-    padding: 5px;
-    * {
-        margin: 5px;
-    }
+  display: flex;
+  padding: 5px;
+  * {
+    margin: 5px;
+  }
+}
+
+.circle-btn {
+  border-radius: 50%;
+  padding: 20px;
+}
+
+.black-bg {
+  background-color: #000;
+}
+
+.blue-bg {
+  background-color: #00259e;
+}
+
+.red-bg {
+  background-color: #ff0000;
+}
+
+.green-bg {
+  background-color: #008000;
+}
+
+.yellow-bg {
+  background-color: #f2f200;
 }

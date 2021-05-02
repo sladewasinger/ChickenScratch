@@ -10,7 +10,7 @@ import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { BlackBrush, Brush, Eraser } from 'src/app/models/brushes/brushes';
+import { SolidBrush, BaseBrush, Eraser } from 'src/app/models/brushes/brushes';
 
 @Component({
   selector: 'app-lobby-game',
@@ -18,9 +18,9 @@ import { BlackBrush, Brush, Eraser } from 'src/app/models/brushes/brushes';
   styleUrls: ['./lobby-game.component.scss']
 })
 export class LobbyGameComponent implements OnInit {
-  @ViewChild("canvas", {static: false}) canvas: ElementRef<HTMLCanvasElement>;
-  @ViewChild("mouseCanvas", {static: false}) mouseCanvas: ElementRef<HTMLCanvasElement>;
-  @ViewChild("chatLog", {static: false}) chatLog: ElementRef<HTMLElement>;
+  @ViewChild("canvas", { static: false }) canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild("mouseCanvas", { static: false }) mouseCanvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild("chatLog", { static: false }) chatLog: ElementRef<HTMLElement>;
   @ViewChild("imgContainer") imageContainer;
 
   mousePos = new Point(0, 0);
@@ -32,7 +32,7 @@ export class LobbyGameComponent implements OnInit {
   gameState: GameState;
   guessForm: FormGroup;
 
-  currentBrush: Brush;
+  currentBrush: BaseBrush;
 
   get lobby(): Lobby {
     return this.lobbyState?.lobbies
@@ -54,7 +54,7 @@ export class LobbyGameComponent implements OnInit {
   get guess() {
     return this.guessForm?.get('guess');
   }
-  
+
   get activePlayer() {
     return this.gameState?.activePlayer;
   }
@@ -173,7 +173,7 @@ export class LobbyGameComponent implements OnInit {
 
   async onDrawRequestReceived(base64) {
     var data = base64 as string;
-    
+
     var img = new Image();
     img.onload = () => {
       this.imageContainer.nativeElement.appendChild(img);
@@ -222,8 +222,30 @@ export class LobbyGameComponent implements OnInit {
     this.hubSocketService.send("Clear", "");
   }
 
+  setColor(color) {
+    if (this.currentBrush.setColor) {
+      this.currentBrush.setColor(color);
+    }
+  }
+
+  hashCode(str) { // java String#hashCode
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return hash;
+  }
+
+  intToRGB(i) {
+    var c = (i & 0x00FFFFFF)
+      .toString(16)
+      .toUpperCase();
+
+    return "00000".substring(0, 6 - c.length) + c;
+  }
+
   switchToBlackBrush() {
-    this.currentBrush = new BlackBrush(this.canvas.nativeElement, this.mouseCanvas.nativeElement);
+    this.currentBrush = new SolidBrush(this.canvas.nativeElement, this.mouseCanvas.nativeElement);
   }
 
   switchToEraser() {

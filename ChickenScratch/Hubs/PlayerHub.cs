@@ -11,32 +11,23 @@ namespace ChickenScratch.Hubs
     {
         private readonly LobbyStateManager lobbyStateManager;
         private readonly PlayerRepository playerRepository;
+        private readonly GameLogicInvoker gameManager;
 
-        public PlayerHub(LobbyStateManager lobbyStateManager, PlayerRepository playerRepository)
+        public PlayerHub(LobbyStateManager lobbyStateManager, PlayerRepository playerRepository, GameLogicInvoker gameManager)
         {
             this.lobbyStateManager = lobbyStateManager ?? throw new ArgumentNullException(nameof(lobbyStateManager));
             this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            this.gameManager = gameManager ?? throw new ArgumentNullException(nameof(gameManager));
         }
 
         public async Task<HubResponse> CreatePlayer(string playerName)
         {
-            if (playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player existingPlayer))
-            {
-                return HubResponse
-                    .Error($"A player already exists for this connectionId with name '{existingPlayer.Name}'");
-            }
+            return await gameManager.CallMethod(nameof(CreatePlayer), Context, Clients, playerName);
+        }
 
-            var player = new Player()
-            {
-                Name = playerName,
-                ConnectionId = Context.ConnectionId,
-                ID = Guid.NewGuid()
-            };
-
-            playerRepository.AddOrUpdate(player.ID, player);
-
-            await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
-            return HubResponse<Player>.Success(player);
+        public HubResponse GetTotalPlayerCount()
+        {
+            return HubResponse<int>.Success(playerRepository.Count());
         }
 
         public async override void OnDisconnectedAsync()

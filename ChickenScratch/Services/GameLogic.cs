@@ -182,5 +182,26 @@ namespace ChickenScratch.Hubs
                 await Clients.SendToClient("GameStateUpdated", player.ConnectionId, gameState);
             }
         }
+
+        public async Task<HubResponse> CreatePlayer(string playerName)
+        {
+            if (playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player existingPlayer))
+            {
+                return HubResponse
+                    .Error($"A player already exists for this connectionId with name '{existingPlayer.Name}'");
+            }
+
+            var player = new Player()
+            {
+                Name = playerName,
+                ConnectionId = Context.ConnectionId,
+                ID = Guid.NewGuid()
+            };
+
+            playerRepository.AddOrUpdate(player.ID, player);
+
+            await Clients.SendAll("LobbyStateUpdated", lobbyStateManager.GetState());
+            return HubResponse<Player>.Success(player);
+        }
     }
 }

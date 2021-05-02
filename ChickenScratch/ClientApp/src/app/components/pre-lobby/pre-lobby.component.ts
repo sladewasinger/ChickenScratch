@@ -18,6 +18,7 @@ export class PreLobbyComponent implements OnInit {
   joinLobbyForm: FormGroup;
   subs: Subscription[] = [];
   myPlayer: Player;
+  totalPlayerCount: number;
 
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
@@ -59,6 +60,7 @@ export class PreLobbyComponent implements OnInit {
     console.log("attempting connect");
     try {
       await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":443/ws");
+      await this.onConnected();
     } catch (error) {
       console.log("ERROR connecting to hub socket service: ", error);
     }
@@ -66,6 +68,12 @@ export class PreLobbyComponent implements OnInit {
 
   get connected() {
     return this.hubSocketService.Connected;
+  }
+
+  async onConnected() {
+    const hubResponse = await this.hubSocketService.sendWithPromise<HubResponse<number>>("GetTotalPlayerCount", {});
+    const count = hubResponse.data;
+    this.totalPlayerCount = count;
   }
 
   async onDisconnect(x) {
