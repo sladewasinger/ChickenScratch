@@ -22,6 +22,7 @@ export class LobbyGameComponent implements OnInit {
   @ViewChild("mouseCanvas", { static: false }) mouseCanvas: ElementRef<HTMLCanvasElement>;
   @ViewChild("chatLog", { static: false }) chatLog: ElementRef<HTMLElement>;
   @ViewChild("imgContainer") imageContainer;
+  @ViewChild("timer") timer: ElementRef<HTMLElement>;
 
   mousePos = new Point(0, 0);
 
@@ -207,8 +208,8 @@ export class LobbyGameComponent implements OnInit {
     span.className = "chat-msg";
     span.style.display = "block";
     span.style.whiteSpace = "nowrap";
-    this.chatLog.nativeElement.appendChild(span);
-    this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
+    this.chatLog.nativeElement.prepend(span);
+    // this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
   }
 
   sendClear() {
@@ -223,9 +224,8 @@ export class LobbyGameComponent implements OnInit {
   }
 
   setColor(color) {
-    if (this.currentBrush.setColor) {
-      this.currentBrush.setColor(color);
-    }
+    this.switchToBlackBrush();
+    this.currentBrush.setColor(color);
   }
 
   hashCode(str) { // java String#hashCode
@@ -269,13 +269,15 @@ export class LobbyGameComponent implements OnInit {
     this.mousePos.y = e.offsetY;
 
     if (this.myTurn) {
-      this.currentBrush.onMouseMove(this.mousePos);
+      this.currentBrush.onMouseMove(new Point(this.mousePos.x, this.mousePos.y));
     }
   }
 
-  onMouseDown() {
+  onMouseDown(e: MouseEvent) {
     if (this.myTurn) {
-      this.currentBrush.onMouseDown();
+      this.mousePos.x = e.offsetX;
+      this.mousePos.y = e.offsetY;
+      this.currentBrush.onMouseDown(this.mousePos);
     }
   }
 

@@ -23,7 +23,9 @@
 
 .chat-log {
   max-height: 400px;
-  overflow-y: scroll;
+  min-height: 100px;
+  overflow: hidden;
+  border-left: 1px solid #333;
 }
 
 .player-list {
@@ -94,7 +96,7 @@
 
 .circle-btn {
   border-radius: 50%;
-  padding: 20px;
+  padding: 15px;
 }
 
 .black-bg {

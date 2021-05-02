@@ -1,6 +1,8 @@
 import { Point } from '../point';
 import { GameState } from '../gameState';
 import { CONTEXT_NAME } from '@angular/compiler/src/render3/view/util';
+import { __assign } from 'tslib';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 export class BaseBrush {
     canvas: HTMLCanvasElement;
@@ -23,7 +25,7 @@ export class BaseBrush {
     onMouseMove(mousePos: Point) {
     }
 
-    onMouseDown() {
+    onMouseDown(mousePos: Point) {
     }
 
     onMouseUp() {
@@ -57,18 +59,18 @@ export class SolidBrush extends BaseBrush {
     }
 
     onMouseMove(mousePos: Point) {
-        this.prevMousePos = this.mousePos;
-        this.mousePos = mousePos;
+        this.prevMousePos = new Point(this.mousePos.x, this.mousePos.y);
+        this.mousePos = new Point(mousePos.x, mousePos.y);
 
         if (this.mouseDown) {
             this.line.push(new Point(mousePos.x, mousePos.y));
         }
     }
 
-    onMouseDown() {
+    onMouseDown(mousePos: Point) {
         this.mouseDown = true;
         this.line = [];
-        this.line.push(new Point(this.mousePos.x, this.mousePos.y));
+        this.line.push(new Point(mousePos.x, mousePos.y));
     }
 
     onMouseUp() {
@@ -76,6 +78,7 @@ export class SolidBrush extends BaseBrush {
             return;
         }
         this.mouseDown = false;
+
         this.line = [];
     }
 
@@ -125,8 +128,8 @@ export class SolidBrush extends BaseBrush {
             return;
         }
 
-        var startPoint = this.line[0];
-        var endPoint = this.line[this.line.length - 1];
+        const startPoint = new Point(this.line[0].x, this.line[0].y);
+        const endPoint = new Point(this.line[this.line.length - 1].x, this.line[this.line.length - 1].y);
 
         var ctx = this.canvas.getContext("2d");
         ctx.imageSmoothingEnabled = true;
@@ -136,6 +139,7 @@ export class SolidBrush extends BaseBrush {
         ctx.lineJoin = 'round';
 
         ctx.beginPath();
+        console.log("moving to " + startPoint.x);
         ctx.moveTo(startPoint.x, startPoint.y);
         for (var i = 1; i < this.line.length - 2; i++) {
             var point = this.line[i];
