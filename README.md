@@ -26,7 +26,7 @@ Right now you can open as many tabs as you want and connect them to the server. 
 
 From the commandline:
 
-- **.../ChickenScratch/ChickenScratch/chicken-scratch-app**:
+- **.../ChickenScratch/ChickenScratch/ClientApp**:
   - `npm install` (first time only)
   - `npm run start-local`
 - **.../ChickenScratch/**:

@@ -15,6 +15,9 @@ export class HubConnectionGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    /* TEMP: This is for testing */
+    return true;
+
     if (!this.hubService.Connected) {
       this.router.navigate(['']);
     }

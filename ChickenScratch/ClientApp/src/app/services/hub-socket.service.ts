@@ -96,7 +96,7 @@ export class HubSocketService {
     this.socket.send(stringData);
 
     this.promiseIdCounter++;
-    if (this.promiseIdCounter >= Number.MAX_VALUE) {
+    if (this.promiseIdCounter >= 10000000) {
       this.promiseIdCounter = 0;
     }
 
@@ -138,7 +138,7 @@ export class HubSocketService {
     } else {
       //var hubMethod = this.hubMethods.find(x => x.methodName == hubData.methodName);
       //if (hubMethod) {
-      console.log("Received message with no explicit client origin", hubData);
+      console.log("Received message with no explicit client origin (server sent data without client's request)", hubData);
       //await hubMethod.callback(hubData.data);
       this.hubMessageStream.next(hubData);
       return;

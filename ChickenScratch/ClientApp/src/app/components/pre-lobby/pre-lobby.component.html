@@ -16,58 +16,94 @@
             There are currently {{ totalPlayerCount }} players online.
         </div>
     </div>
-    <div class="row" *ngIf="!myPlayer">
-        <div class="col-sm">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Player</h5>
-                    <form [formGroup]="playerForm" (ngSubmit)="playerFormSubmit()" autocomplete="off">
-                        <div class="form-group">
-                            <label for="playerName">Username:</label>
-                            <input type="text" class="form-control" id="playerName" formControlName="playerName"
-                                placeholder="Enter username" required>
-                            <div *ngIf="playerName.invalid && (playerName.dirty || playerName.touched)"
-                                class="alert alert-danger">
-                                <div *ngIf="playerName.errors.minlength || playerName.errors.required">
-                                    Name is required
+    <ng-container *ngIf="!lobby">
+        <div class="row" *ngIf="!myPlayer">
+            <div class="col-sm">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Player</h5>
+                        <form [formGroup]="playerForm" (ngSubmit)="playerFormSubmit()" autocomplete="off">
+                            <div class="form-group">
+                                <label for="playerName">Username:</label>
+                                <input type="text" class="form-control" id="playerName" formControlName="playerName"
+                                    placeholder="Enter username" required>
+                                <div *ngIf="playerName.invalid && (playerName.dirty || playerName.touched)"
+                                    class="alert alert-danger">
+                                    <div *ngIf="playerName.errors.minlength || playerName.errors.required">
+                                        Name is required
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">
-                            Create Player
-                        </button>
-                    </form>
+                            <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">
+                                Create Player
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div *ngIf="myPlayer">
-        <div class="card-deck">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Join Lobby</h5>
-                    <form [formGroup]="joinLobbyForm" (ngSubmit)="joinLobby()" autocomplete="off">
-                        <div class="form-group">
-                            <label for="lobbyKey">Enter lobby code:</label>
-                            <input type="text" class="form-control" id="lobbyKey" formControlName="lobbyKey"
-                                placeholder="lobby code" required>
-                            <div *ngIf="lobbyKey && lobbyKey.invalid && (lobbyKey.dirty || lobbyKey.touched)"
-                                class="alert alert-danger">
-                                <div *ngIf="lobbyKey.errors.minlength || lobbyKey.errors.required">
-                                    Lobby Code is required
+        <div *ngIf="myPlayer">
+            <div class="card-deck">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Join Lobby</h5>
+                        <form [formGroup]="joinLobbyForm" (ngSubmit)="joinLobby()" autocomplete="off">
+                            <div class="form-group">
+                                <label for="lobbyKeyInput">Enter lobby code:</label>
+                                <input type="text" class="form-control" id="lobbyKeyInput"
+                                    formControlName="lobbyKeyInput" placeholder="lobby code" required>
+                                <div *ngIf="lobbyKeyInput && lobbyKeyInput.invalid && (lobbyKeyInput.dirty || lobbyKeyInput.touched)"
+                                    class="alert alert-danger">
+                                    <div *ngIf="lobbyKeyInput.errors.minlength || lobbyKeyInput.errors.required">
+                                        Lobby Code is required
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-success" [disabled]="lobbyKey.invalid">JOIN</button>
-                    </form>
+                            <button type="submit" class="btn btn-success"
+                                [disabled]="lobbyKeyInput.invalid">JOIN</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div class="card justify-content-center align-items-center">
-                <div class="text-center">
-                    <h4 class="card-title">or Create Your Own Lobby</h4>
-                    <button type="submit" class="btn btn-warning" (click)="createLobby()">Create Lobby</button>
+                <div class="card justify-content-center align-items-center">
+                    <div class="text-center">
+                        <h4 class="card-title">or Create Your Own Lobby</h4>
+                        <button type="submit" class="btn btn-warning" (click)="createLobby()">Create Lobby</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </ng-container>
+    <ng-container *ngIf="lobby">
+        <div class="container" *ngIf="!gameState">
+            <div class="card" *ngIf="lobbyState && lobby && myPlayer">
+                <div class="card-body">
+                    <div class="card-title">
+                        <h3>
+                            Lobby: {{ lobby.key }}
+                            <button *ngIf="lobby.lobbyLeader.id == myPlayer.id" class="btn btn-primary"
+                                (click)="startGame()" style="float: right">
+                                START GAME
+                            </button>
+                        </h3>
+                    </div>
+                    <div>
+                        <div style="margin: 25px 0 25px 0; font-style: italic;">Wait until everyone joins to start the
+                            game!
+                        </div>
+                        <h5>Players in Lobby:</h5>
+                        <ol>
+                            <li *ngFor="let player of players">
+                                {{ player.name }}
+                                <span *ngIf="lobby.lobbyLeader.id == player.id">- Lobby Leader</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1>{{lobbyKey}}</h1>
+        <app-lobby-game *ngIf="lobby.gameRunning">
+        </app-lobby-game>
+    </ng-container>
 </div>

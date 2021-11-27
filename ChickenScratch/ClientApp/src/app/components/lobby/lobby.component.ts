@@ -23,10 +23,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
   lobbyState: LobbyState;
   myPlayer: Player;
   gameState: GameState;
+  lobbyKey: string;
 
   get lobby(): Lobby {
-    return this.lobbyState?.lobbies
-      .find(l => l.players.some(p => p.connectionId == this.hubSocketService.ConnectionId));
+    return this.lobbyState?.lobbies.find(l => l.key == this.lobbyKey);
   }
 
   get players(): Player[] {
@@ -41,9 +41,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
     return this.gameState?.activePlayer.id == this.myPlayer?.id;
   }
 
-  constructor(private hubSocketService: HubSocketService,
+  constructor(
+    private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
-    private router: Router) {
+    private router: Router,
+    private route: ActivatedRoute) {
   }
 
   async ngOnDestroy() {
@@ -51,6 +53,12 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.lobbyKey = this.route.snapshot.paramMap.get('key');
+    if (!this.lobbyKey) {
+      console.log("Invalid lobby key!");
+      this.router.navigate(['']);
+    }
+
     this.subs.push(
       this.lobbyStateService.getLobbyState().subscribe(l => {
         this.lobbyState = l;
@@ -63,6 +71,25 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.gameState = x;
       })
     );
+
+    await this.tryConnect();
+  }
+
+  async tryConnect() {
+    console.log("attempting connect");
+    try {
+      await this.hubSocketService.doConnect("wss://" + window.location.hostname + ":443/ws");
+      await this.onConnected();
+    } catch (error) {
+      console.log("ERROR connecting to hub socket service: ", error);
+    }
+  }
+
+  async onConnected() {
+    if (!this.lobby) {
+      console.log("Joining lobby?");
+      await this.joinLobby();
+    }
   }
 
   async startGame() {
@@ -73,6 +100,23 @@ export class LobbyComponent implements OnInit, OnDestroy {
     }
     catch (error) {
       console.log("ERROR starting game!", error);
+    }
+  }
+
+  async joinLobby() {
+    try {
+      var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("joinLobby", {
+        lobbyKey: this.lobbyKey
+      });
+
+      if (!response.isSuccess) {
+        throw response;
+      }
+
+      this.router.navigate(['lobby', this.lobbyKey]);
+    }
+    catch (error) {
+      console.log("join lobby failed:", error);
     }
   }
 }

@@ -229,8 +229,8 @@ export class LobbyGameComponent implements OnInit {
     span.className = "chat-msg";
     span.style.display = "block";
     span.style.whiteSpace = "nowrap";
-    this.chatLog.nativeElement.prepend(span);
-    // this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
+    this.chatLog.nativeElement.append(span);
+    this.chatLog.nativeElement.scrollTop = this.chatLog.nativeElement.scrollHeight;
   }
 
   sendClear() {

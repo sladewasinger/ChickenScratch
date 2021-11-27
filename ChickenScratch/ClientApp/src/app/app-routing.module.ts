@@ -9,7 +9,13 @@ import { LobbyGuard } from './route-guards/lobby.guard';
 const routes: Routes = [
   { path: '', component: PreLobbyComponent, canActivate: [LobbyGuard] },
   {
-    path: 'lobby', component: LobbyComponent, canActivate: [HubConnectionGuard]
+    path: 'lobby', component: PreLobbyComponent, canActivate: [HubConnectionGuard]
+  },
+  {
+    path: 'lobby/:key', component: PreLobbyComponent, canActivate: [HubConnectionGuard]
+  },
+  {
+    path: 'lobbyOLD/:key', component: LobbyComponent, canActivate: [HubConnectionGuard]
   },
   {
     path: 'lobby-game', component: LobbyGameComponent, canActivate: [HubConnectionGuard]

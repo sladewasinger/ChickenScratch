@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { HubSocketService } from 'src/app/services/hub-socket.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { HubResponse } from 'src/app/models/hubResponse';
 import { LobbyState } from 'src/app/models/lobbyState';
 import { Player } from 'src/app/models/player';
 import { FormGroup, FormBuilder, NgForm, FormControl, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { GamePlayer, GameState } from 'src/app/models/gameState';
+import { Lobby } from 'src/app/models/lobby';
 
 @Component({
   selector: 'app-pre-lobby',
@@ -20,15 +22,49 @@ export class PreLobbyComponent implements OnInit {
   myPlayer: Player;
   totalPlayerCount: number;
 
+  lobbyState: LobbyState;
+  gameState: GameState;
+  lobbyKey: string;
+
+  get lobby(): Lobby {
+    return this.lobbyState?.lobbies.find(l => l.key == this.lobbyKey);
+  }
+
+  get players(): Player[] {
+    return this.lobby?.players;
+  }
+
+  get gamePlayers(): GamePlayer[] {
+    return this.gameState?.players;
+  }
+
+  get myTurn(): boolean {
+    return this.gameState?.activePlayer.id == this.myPlayer?.id;
+  }
+
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
     private router: Router,
+    private route: ActivatedRoute,
     private formBuilder: FormBuilder) { }
 
   async ngOnInit() {
+    this.lobbyKey = this.route.snapshot.paramMap.get('key');
+    if (!this.lobbyKey) {
+      console.log("Invalid lobby key!");
+      this.router.navigate(['']);
+    }
+
     this.subs.push(
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
+      }),
+      this.lobbyStateService.getLobbyState().subscribe(l => {
+        this.lobbyState = l;
+      }),
+      this.hubSocketService.listenOn<any>("GameStateUpdated").subscribe(x => {
+        console.log("Game State Update: ", x);
+        this.gameState = x;
       }),
       this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x))
     );
@@ -38,7 +74,7 @@ export class PreLobbyComponent implements OnInit {
     });
 
     this.joinLobbyForm = this.formBuilder.group({
-      lobbyKey: new FormControl('', [Validators.required, Validators.minLength(1)])
+      lobbyKeyInput: new FormControl('', [Validators.required, Validators.minLength(1)])
     });
 
     await this.tryConnect();
@@ -52,8 +88,8 @@ export class PreLobbyComponent implements OnInit {
     return this.playerForm.get('playerName');
   }
 
-  get lobbyKey() {
-    return this.joinLobbyForm.get('lobbyKey');
+  get lobbyKeyInput() {
+    return this.joinLobbyForm.get('lobbyKeyInput');
   }
 
   async tryConnect() {
@@ -89,6 +125,17 @@ export class PreLobbyComponent implements OnInit {
     await this.createPlayer();
   }
 
+  async startGame() {
+    try {
+      var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
+      this.gameState = result;
+      ///this.router.navigate(['lobby-game']);
+    }
+    catch (error) {
+      console.log("ERROR starting game!", error);
+    }
+  }
+
   async createPlayer() {
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<Player>>("createPlayer", {
@@ -100,6 +147,9 @@ export class PreLobbyComponent implements OnInit {
       }
 
       this.lobbyStateService.updateMyPlayer(response.data);
+      if (this.lobbyKey) {
+        this.joinLobby();
+      }
     }
     catch (error) {
       console.log("PLAYER creation FAILED: ", error);
@@ -115,8 +165,10 @@ export class PreLobbyComponent implements OnInit {
       if (!response.isSuccess) {
         throw response;
       }
-
-      this.router.navigate(['lobby']);
+      var lobby = response.data.lobbies.find(l => l.players.some(p => p.id == this.myPlayer.id));
+      this.lobbyKey = lobby.key;
+      this.router.navigate(['lobby', this.lobbyKey]);
+      console.log(this.lobby);
     }
     catch (error) {
       console.log("lobby creation failed!", error);
@@ -126,14 +178,14 @@ export class PreLobbyComponent implements OnInit {
   async joinLobby() {
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("joinLobby", {
-        lobbyKey: this.lobbyKey.value
+        lobbyKey: this.lobbyKey
       });
 
       if (!response.isSuccess) {
         throw response;
       }
 
-      this.router.navigate(['lobby']);
+      this.router.navigate(['lobby', this.lobbyKey]);
     }
     catch (error) {
       console.log("join lobby failed:", error);
