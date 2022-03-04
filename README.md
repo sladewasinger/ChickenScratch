@@ -1,6 +1,6 @@
 # ChickenScratch
 
-A multiplayer drawing game where one person draws and the other people guess what the drawing is! The first person to guess gets the most points.
+A multiplayer drawing game where one person draws and the other people guess what the drawing is! The first person to guess gets the most points.  
 https://chickenscratch.azurewebsites.net/
 
 ## SignalR-like technology
