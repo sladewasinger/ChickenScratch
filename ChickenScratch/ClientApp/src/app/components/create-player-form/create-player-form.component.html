@@ -1,0 +1,24 @@
+<div class="row" *ngIf="!myPlayer">
+  <div class="col-sm">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Player</h5>
+        <form [formGroup]="playerForm" (ngSubmit)="playerFormSubmit()" autocomplete="off">
+          <div class="form-group">
+            <label for="playerName">Username:</label>
+            <input type="text" class="form-control" id="playerName" formControlName="playerName"
+              placeholder="Enter username" required>
+            <div *ngIf="playerName.invalid && (playerName.dirty || playerName.touched)" class="alert alert-danger">
+              <div *ngIf="playerName.errors.minlength || playerName.errors.required">
+                Name is required
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">
+            Create Player
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

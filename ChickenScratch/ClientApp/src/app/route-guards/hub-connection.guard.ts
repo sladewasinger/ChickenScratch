@@ -16,6 +16,7 @@ export class HubConnectionGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     if (!this.hubService.Connected) {
+      console.log("Not connected to hub - redirecting.");
       this.router.navigate(['']);
     }
     return this.hubService.Connected;

@@ -26,10 +26,10 @@ Right now you can open as many tabs as you want and connect them to the server. 
 
 From the commandline:
 
-- **.../ChickenScratch/ChickenScratch/chicken-scratch-app**:
+- **. . . /ChickenScratch/ChickenScratch/ClientApp/**:
   - `npm install` (first time only)
   - `npm run start-local`
-- **.../ChickenScratch/**:
+- **. . . /ChickenScratch/**:
   - `dotnet restore` (first time only)
   - `dotnet watch run --urls https://0.0.0.0 --project=ChickenScratch `
   - (The --urls https://0.0.0.0 allows other devices on local network to access kestrel)

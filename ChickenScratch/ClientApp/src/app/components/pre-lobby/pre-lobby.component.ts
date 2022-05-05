@@ -81,10 +81,6 @@ export class PreLobbyComponent implements OnInit {
     await this.tryConnect();
   }
 
-  async sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   async playerFormSubmit() {
     await this.createPlayer();
   }
@@ -115,8 +111,8 @@ export class PreLobbyComponent implements OnInit {
       if (!response.isSuccess) {
         throw response;
       }
-
-      this.router.navigate(['lobby']);
+      let lobby = response.data.lobbies.find(l => l.players.some(p => p.id == this.myPlayer.id));
+      this.router.navigate(['lobbyKey', lobby.key]);
     }
     catch (error) {
       console.log("lobby creation failed!", error);
