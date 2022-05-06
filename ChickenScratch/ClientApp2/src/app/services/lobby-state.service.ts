@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LobbyState } from '../models/lobbyState';
-import { Subject, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { HubSocketService } from './hub-socket.service';
 import { Player } from '../models/player';
 import { Router } from '@angular/router';
@@ -9,8 +9,8 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class LobbyStateService {
-  private myPlayerStream = new ReplaySubject<Player>(1);
-  private lobbyStateStream = new ReplaySubject<LobbyState>(1);
+  private myPlayerStream = new ReplaySubject<Player | null>(1);
+  private lobbyStateStream = new ReplaySubject<LobbyState | null>(1);
   private isInLobby = false;
 
   constructor(private hubSocketService: HubSocketService,
@@ -23,28 +23,28 @@ export class LobbyStateService {
     return this.isInLobby;
   }
 
-  getLobbyState(): Observable<LobbyState> {
+  getLobbyState(): Observable<LobbyState | null> {
     return this.lobbyStateStream.asObservable();
+  }
+
+  updateLobbyState(lobbyState: LobbyState | null) {
+    this.isInLobby = true;
+    this.lobbyStateStream.next(lobbyState);
+  }
+
+  getMyPlayer(): Observable<Player | null> {
+    return this.myPlayerStream.asObservable();
   }
 
   updateMyPlayer(player: Player | null) {
     this.myPlayerStream.next(player);
   }
 
-  getMyPlayer(): Observable<Player> {
-    return this.myPlayerStream.asObservable();
-  }
-
-  private onDisconnect(e) {
+  private onDisconnect(e: any) {
     console.log("Lobby service - hub disconnected");
     this.updateMyPlayer(null);
     this.updateLobbyState(null);
     this.isInLobby = false;
     this.router.navigate(['']);
-  }
-
-  private updateLobbyState(lobbyState: LobbyState | null) {
-    this.isInLobby = true;
-    this.lobbyStateStream.next(lobbyState);
   }
 }

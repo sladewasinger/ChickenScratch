@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
@@ -7,8 +7,8 @@ import { HubSocketService } from 'src/app/services/hub-socket.service';
 import { LobbyStateService } from 'src/app/services/lobby-state.service';
 import { Subscription } from 'rxjs';
 import { Player } from 'src/app/models/player';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreatePlayerFormComponent } from '../create-player-form/create-player-form.component';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-lobby2',
@@ -16,15 +16,15 @@ import { CreatePlayerFormComponent } from '../create-player-form/create-player-f
   styleUrls: ['./lobby2.component.scss']
 })
 export class Lobby2Component implements OnInit {
-  lobbyKey: string;
+  lobbyKey: string | null = null;
   subs: Subscription[] = [];
-  myPlayer: Player;
+  myPlayer: Player | null = null;
 
   constructor(private route: ActivatedRoute,
     private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
     private router: Router,
-    private modalService: NgbModal) { }
+    public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.lobbyKey = this.route.snapshot.paramMap.get('key');
@@ -36,7 +36,14 @@ export class Lobby2Component implements OnInit {
       })
     );
 
-    this.modalService.open(CreatePlayerFormComponent);
+    const dialogRef = this.dialog.open(CreatePlayerFormComponent, {
+      width: '300px',
+      data: {}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log("closed dialog");
+    });
   }
 
   async ngOnDestroy() {
