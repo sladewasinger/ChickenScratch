@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { Player } from 'src/app/models/player';
 import { CreatePlayerFormComponent } from '../create-player-form/create-player-form.component';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Lobby } from 'src/app/models/lobby';
 
 @Component({
   selector: 'app-lobby',
@@ -19,6 +20,7 @@ export class LobbyComponent implements OnInit {
   lobbyKey: string | null = null;
   subs: Subscription[] = [];
   myPlayer: Player | null = null;
+  lobby: Lobby | undefined = undefined;
 
   constructor(private route: ActivatedRoute,
     private hubSocketService: HubSocketService,
@@ -26,15 +28,26 @@ export class LobbyComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.lobbyKey = this.route.snapshot.paramMap.get('key');
+
     console.log("Lobby Key: ", this.lobbyKey);
 
     this.subs.push(
       this.lobbyStateService.getMyPlayer().subscribe(p => {
         this.myPlayer = p;
+      }),
+      this.lobbyStateService.getLobbyState().subscribe(ls => {
+        this.lobby = ls?.lobbies.find(x => x.players.some(p => p.id == this.myPlayer?.id));
       })
     );
+
+    while (!this.hubSocketService.Connected) {
+      console.log("Not connected! Waiting...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+
 
     const dialogRef = this.dialog.open(CreatePlayerFormComponent, {
       width: '300px',

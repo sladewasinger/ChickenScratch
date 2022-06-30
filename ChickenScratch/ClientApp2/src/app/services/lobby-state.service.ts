@@ -27,7 +27,7 @@ export class LobbyStateService {
     return this.lobbyStateStream.asObservable();
   }
 
-  updateLobbyState(lobbyState: LobbyState | null) {
+  private updateLobbyState(lobbyState: LobbyState | null) {
     this.isInLobby = true;
     this.lobbyStateStream.next(lobbyState);
   }
