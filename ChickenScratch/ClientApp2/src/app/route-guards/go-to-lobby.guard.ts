@@ -18,7 +18,7 @@ export class GoToLobbyGuard implements CanActivate {
     state: RouterStateSnapshot
   ) {
     if (this.lobbyStateService.PlayerIsInLobby) {
-      this.router.navigate(['lobby']);
+      this.router.navigateByUrl('');
       return false;
     }
     return true;

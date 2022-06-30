@@ -12,6 +12,7 @@ export class LobbyStateService {
   private myPlayerStream = new ReplaySubject<Player | null>(1);
   private lobbyStateStream = new ReplaySubject<LobbyState | null>(1);
   private isInLobby = false;
+  private player: Player | null = null;
 
   constructor(private hubSocketService: HubSocketService,
     private router: Router) {
@@ -28,7 +29,7 @@ export class LobbyStateService {
   }
 
   private updateLobbyState(lobbyState: LobbyState | null) {
-    this.isInLobby = true;
+    this.isInLobby = lobbyState?.lobbies.find(x => x.players.some(p => p.id == this.player?.id)) != null;
     this.lobbyStateStream.next(lobbyState);
   }
 
@@ -37,6 +38,7 @@ export class LobbyStateService {
   }
 
   updateMyPlayer(player: Player | null) {
+    this.player = player;
     this.myPlayerStream.next(player);
   }
 

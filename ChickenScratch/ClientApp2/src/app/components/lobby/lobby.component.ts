@@ -44,11 +44,14 @@ export class LobbyComponent implements OnInit {
 
     while (!this.hubSocketService.Connected) {
       console.log("Not connected! Waiting...");
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await this.sleep(500);
     }
 
+    this.onConnected();
+  }
 
-
+  onConnected() {
+    console.log("YAY WE ARE CONNECT");
     const dialogRef = this.dialog.open(CreatePlayerFormComponent, {
       width: '300px',
       data: {},
@@ -57,7 +60,28 @@ export class LobbyComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log("closed dialog");
+      this.playerNameEntered();
     });
+  }
+
+  playerNameEntered() {
+    this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("createPlayer", {
+      playerName: this.myPlayer?.name
+    }).then(response => {
+      if (!response.isSuccess) {
+        throw response;
+      }
+      console.log("Player created:", response.data);
+      this.joinLobby();
+    }
+    ).catch(error => {
+      console.log("create player failed:", error);
+    });
+  }
+
+  async sleep(sleepDurationMs: number) {
+    if (sleepDurationMs < 0) throw new Error("sleepDurationMs must be positive");
+    return new Promise(resolve => setTimeout(resolve, sleepDurationMs));
   }
 
   async ngOnDestroy() {
@@ -71,10 +95,11 @@ export class LobbyComponent implements OnInit {
       });
 
       if (!response.isSuccess) {
-        throw response;
+        console.log("Could not join lobby. Does it exist?", response);
+        this.router.navigate(['/prelobby'], {
+          replaceUrl: true
+        });
       }
-
-      this.router.navigate(['lobby']);
     }
     catch (error) {
       console.log("join lobby failed:", error);

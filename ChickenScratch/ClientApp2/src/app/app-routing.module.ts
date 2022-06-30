@@ -6,9 +6,10 @@ import { GoToLobbyGuard } from './route-guards/go-to-lobby.guard';
 import { HubConnectionGuard } from './route-guards/hub-connection.guard';
 
 const routes: Routes = [
-  { path: '', component: PreLobbyComponent, canActivate: [GoToLobbyGuard] },
+  { path: '', redirectTo: 'prelobby', pathMatch: 'full' },
+  { path: 'prelobby', component: PreLobbyComponent },
   {
-    path: 'lobby/:key', component: LobbyComponent, canActivate: [HubConnectionGuard]
+    path: 'lobby/:key', component: LobbyComponent
   }
 ];
 

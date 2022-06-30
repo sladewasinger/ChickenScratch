@@ -53,11 +53,12 @@ namespace ChickenScratch.Hubs
                 return HubResponse
                     .Error($"Could not find lobby with key: '{lobbyKey}'.");
             }
-            if (lobby.GameRunning)
-            {
-                return HubResponse
-                    .Error($"Game is already running! Cannot join!");
-            }
+            // TODO: Re-evaluate this. I think we should allow players to re-join...
+            //if (lobby.GameRunning)
+            //{
+            //    return HubResponse
+            //        .Error($"Game is already running! Cannot join!");
+            //}
 
             lobby.Players.Add(player);
             lobbyRepository.AddOrUpdate(lobby.ID, lobby);
@@ -185,18 +186,24 @@ namespace ChickenScratch.Hubs
 
         public async Task<HubResponse> CreatePlayer(string playerName)
         {
-            if (playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player existingPlayer))
-            {
-                return HubResponse
-                    .Error($"A player already exists for this connectionId with name '{existingPlayer.Name}'");
-            }
-
+            // TODO: Just rename player if they try to join again:
+            //if (playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player existingPlayer))
+            //{
+            //    return HubResponse
+            //        .Error($"A player already exists for this connectionId with name '{existingPlayer.Name}'");
+            //}
+            
             var player = new Player()
             {
                 Name = playerName,
                 ConnectionId = Context.ConnectionId,
                 ID = Guid.NewGuid()
             };
+
+            if (playerRepository.TryGetByConnectionId(Context.ConnectionId, out Player existingPlayer))
+            {
+                player.ID = existingPlayer.ID;
+            }
 
             playerRepository.AddOrUpdate(player.ID, player);
 
