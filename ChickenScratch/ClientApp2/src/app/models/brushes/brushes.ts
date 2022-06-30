@@ -35,6 +35,7 @@ export class BaseBrush {
 
   clearMouseCanvas() {
     var mctx = this.mouseCanvas.getContext("2d");
+    if (mctx == null) throw new Error('mctx is null');
     mctx.clearRect(0, 0, this.mouseCanvas.width, this.mouseCanvas.height);
   }
 }

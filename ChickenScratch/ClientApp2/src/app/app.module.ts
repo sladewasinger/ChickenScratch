@@ -10,13 +10,15 @@ import { LobbyComponent } from './components/lobby/lobby.component';
 import { MaterialModule } from './material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PreLobbyComponent } from './components/pre-lobby/pre-lobby.component';
+import { LobbyGameComponent } from './components/lobby-game/lobby-game.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LobbyComponent,
     CreatePlayerFormComponent,
-    PreLobbyComponent
+    PreLobbyComponent,
+    LobbyGameComponent
   ],
   entryComponents: [
     CreatePlayerFormComponent
