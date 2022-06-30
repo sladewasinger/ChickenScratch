@@ -11,6 +11,13 @@
         },
         "@schematics/angular:application": {
           "strict": true
+        },
+        "architect": {
+          "options": {
+            "sslKey": "ssl/server.key",
+            "sslCert": "ssl/server.crt",
+            "ssl": true
+          }
         }
       },
       "root": "",

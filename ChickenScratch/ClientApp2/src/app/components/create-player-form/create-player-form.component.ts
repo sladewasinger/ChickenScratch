@@ -7,6 +7,7 @@ import { LobbyState } from 'src/app/models/lobbyState';
 import { Player } from 'src/app/models/player';
 import { FormGroup, FormBuilder, NgForm, FormControl, Validators, ValidatorFn, ValidationErrors, AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-create-player-form',
@@ -18,11 +19,13 @@ export class CreatePlayerFormComponent implements OnInit {
   subs: Subscription[] = [];
   myPlayer: Player | null = null;
   totalPlayerCount: number = 0;
+  loading = false;
 
   constructor(private hubSocketService: HubSocketService,
     private lobbyStateService: LobbyStateService,
     private router: Router,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder,
+    public dialogRef: MatDialogRef<any>) {
     this.playerForm = this.formBuilder.group({
       playerName: new FormControl('', [Validators.required, Validators.minLength(1)])
     });
@@ -46,6 +49,7 @@ export class CreatePlayerFormComponent implements OnInit {
     }
 
     try {
+      this.loading = true;
       var response = await this.hubSocketService.sendWithPromise<HubResponse<Player>>("createPlayer", {
         playerName: this.playerName.value
       });
@@ -55,9 +59,13 @@ export class CreatePlayerFormComponent implements OnInit {
       }
 
       this.lobbyStateService.updateMyPlayer(response.data);
+      this.dialogRef.close();
     }
     catch (error) {
       console.log("PLAYER creation FAILED: ", error);
+    }
+    finally {
+      this.loading = false;
     }
   }
 }

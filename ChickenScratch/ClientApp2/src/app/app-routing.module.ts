@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { Lobby2Component } from './components/lobby2/lobby2.component';
+import { LobbyComponent } from './components/lobby/lobby.component';
+import { PreLobbyComponent } from './components/pre-lobby/pre-lobby.component';
+import { GoToLobbyGuard } from './route-guards/go-to-lobby.guard';
 
 const routes: Routes = [
-  // { path: '', component: PreLobbyComponent, canActivate: [LobbyGuard] },
+  { path: '', component: PreLobbyComponent, canActivate: [GoToLobbyGuard] },
   {
-    path: 'lobbyKey/:key', component: Lobby2Component
+    path: 'lobby/:key', component: LobbyComponent
   }
 ];
 
