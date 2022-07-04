@@ -1,0 +1,10 @@
+<div class="container" *ngIf="myPlayer">
+  <div class="row justify-content-center">
+    <div class="col-4">
+      <app-join-lobby></app-join-lobby>
+    </div>
+    <div class="col-4">
+      <app-create-lobby [myPlayer]="myPlayer"></app-create-lobby>
+    </div>
+  </div>
+</div>

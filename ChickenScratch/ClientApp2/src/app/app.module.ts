@@ -6,15 +6,23 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CreatePlayerFormComponent } from './components/create-player-form/create-player-form.component';
-import { Lobby2Component } from './components/lobby2/lobby2.component';
+import { LobbyComponent } from './components/lobby/lobby.component';
 import { MaterialModule } from './material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { PreLobbyComponent } from './components/pre-lobby/pre-lobby.component';
+import { LobbyGameComponent } from './components/lobby-game/lobby-game.component';
+import { JoinLobbyComponent } from './components/pre-lobby/components/join-lobby/join-lobby.component';
+import { CreateLobbyComponent } from './components/pre-lobby/components/create-lobby/create-lobby.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    Lobby2Component,
-    CreatePlayerFormComponent
+    LobbyComponent,
+    CreatePlayerFormComponent,
+    PreLobbyComponent,
+    LobbyGameComponent,
+    JoinLobbyComponent,
+    CreateLobbyComponent
   ],
   entryComponents: [
     CreatePlayerFormComponent

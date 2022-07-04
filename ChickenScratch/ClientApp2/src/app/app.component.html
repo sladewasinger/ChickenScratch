@@ -8,4 +8,6 @@
     </div>
   </div>
 </div>
-<router-outlet [class.hidden]="!connected"></router-outlet>
+<div *ngIf="connected">
+  <router-outlet></router-outlet>
+</div>

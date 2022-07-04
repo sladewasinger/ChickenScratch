@@ -1,0 +1,90 @@
+<div class="container-fluid" [hidden]="!gameState">
+  <div class="row title-row" *ngIf="gameState">
+    <div class="col-sm-12">
+      <h3 *ngIf="myTurn">
+        It's your turn to draw! The word is: <span class="current-word">{{ gameState.currentWord }}</span>
+      </h3>
+      <h3 *ngIf="!myTurn">
+        It's <b>{{ gameState.activePlayer.name }}</b>'s turn to draw! You need to guess what he/she is
+        drawing!
+      </h3>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-lg-3">
+      <div class="player-list" sytle="max-width: 400px">
+        <div class="player-nameplate" *ngFor="let player of gamePlayers"
+          [class.active-player]="player.id == activePlayer?.id">
+          <div>{{ player.name }}</div>
+          <div class="score">Score: {{ player.score }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg" style="min-width: 525px; box-sizing: content-box;">
+      <div class="row">
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="canvas-container" [class.canvas-container-active]="myTurn">
+            <canvas #canvas id="canvas" width="500px" height="400px"></canvas>
+            <canvas #mouseCanvas id="mouseCanvas" width="500px" height="400px"></canvas>
+            <div #imgContainer class="image-container"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          {{ secondsLeft }} seconds left in turn
+        </div>
+      </div>
+      <div class="row" *ngIf="myTurn">
+        <div class="col d-flex justify-content-center controls" *ngIf="gameState">
+          <button class="btn btn-danger" (click)="sendClear()">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+          <button class="btn btn-outline-dark large-font" (click)="switchToEraser()">
+            <i class="fas fa-eraser"></i>
+          </button>
+          <button class="btn btn-outline-light black-bg circle-btn" (mousedown)="setColor('#000')">
+            <i class="fas fa-paint-brush"></i>
+          </button>
+          <button class="btn btn-outline-light blue-bg circle-btn" (mousedown)="setColor('blue')">
+            <i class="fas fa-paint-brush"></i>
+          </button>
+          <button class="btn btn-outline-light red-bg circle-btn" (mousedown)="setColor('red')">
+            <i class="fas fa-paint-brush"></i>
+          </button>
+          <button class="btn btn-outline-light green-bg circle-btn" (mousedown)="setColor('green')">
+            <i class="fas fa-paint-brush"></i>
+          </button>
+          <button class="btn btn-outline-dark yellow-bg circle-btn" (mousedown)="setColor('#F2F200')">
+            <i class="fas fa-paint-brush"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg">
+      <div class="row" *ngIf="guessForm && !myTurn">
+        <div class="col-lg-12">
+          <form [formGroup]="guessForm" *ngIf="!myGamePlayer?.hasGuessedCorrectly" (ngSubmit)="guessFormSubmit()"
+            autocomplete="off" class="guess-form">
+            <div class="form-group">
+              <label for="guess">Guess the word:</label>
+              <input type="text" class="form-control" id="guess" formControlName="guess" placeholder="Enter your guess"
+                required maxlength="50" />
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="guessForm.invalid">
+              GUESS
+            </button>
+          </form>
+          <div *ngIf="!!myGamePlayer?.hasGuessedCorrectly">
+            You guessed correctly!
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col chat-log" #chatLog sytle="max-width: 400px">
+          CHAT LOG
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
