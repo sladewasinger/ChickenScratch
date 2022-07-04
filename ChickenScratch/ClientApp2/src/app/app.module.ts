@@ -11,6 +11,8 @@ import { MaterialModule } from './material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PreLobbyComponent } from './components/pre-lobby/pre-lobby.component';
 import { LobbyGameComponent } from './components/lobby-game/lobby-game.component';
+import { JoinLobbyComponent } from './components/pre-lobby/components/join-lobby/join-lobby.component';
+import { CreateLobbyComponent } from './components/pre-lobby/components/create-lobby/create-lobby.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { LobbyGameComponent } from './components/lobby-game/lobby-game.component
     LobbyComponent,
     CreatePlayerFormComponent,
     PreLobbyComponent,
-    LobbyGameComponent
+    LobbyGameComponent,
+    JoinLobbyComponent,
+    CreateLobbyComponent
   ],
   entryComponents: [
     CreatePlayerFormComponent

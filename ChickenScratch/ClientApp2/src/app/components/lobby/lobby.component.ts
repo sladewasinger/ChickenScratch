@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubResponse } from 'src/app/models/hubResponse';
@@ -10,17 +10,19 @@ import { Player } from 'src/app/models/player';
 import { CreatePlayerFormComponent } from '../create-player-form/create-player-form.component';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Lobby } from 'src/app/models/lobby';
+import { GameState } from 'src/app/models/gameState';
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss']
 })
-export class LobbyComponent implements OnInit {
+export class LobbyComponent implements OnInit, OnDestroy {
   lobbyKey: string | null = null;
   subs: Subscription[] = [];
   myPlayer: Player | null = null;
   lobby: Lobby | undefined = undefined;
+  gameState: GameState | null = null;
 
   constructor(private route: ActivatedRoute,
     private hubSocketService: HubSocketService,
@@ -42,6 +44,8 @@ export class LobbyComponent implements OnInit {
       })
     );
 
+    await this.sleep(250);
+
     while (!this.hubSocketService.Connected) {
       console.log("Not connected! Waiting...");
       await this.sleep(500);
@@ -51,7 +55,11 @@ export class LobbyComponent implements OnInit {
   }
 
   onConnected() {
-    console.log("YAY WE ARE CONNECT");
+    if (!this.myPlayer) this.openPlayerDialog();
+    else this.joinLobby();
+  }
+
+  openPlayerDialog(): void {
     const dialogRef = this.dialog.open(CreatePlayerFormComponent, {
       width: '300px',
       data: {},
@@ -89,6 +97,8 @@ export class LobbyComponent implements OnInit {
   }
 
   async joinLobby() {
+    if (this.lobby) return;
+
     try {
       var response = await this.hubSocketService.sendWithPromise<HubResponse<LobbyState>>("joinLobby", {
         lobbyKey: this.lobbyKey
@@ -103,6 +113,16 @@ export class LobbyComponent implements OnInit {
     }
     catch (error) {
       console.log("join lobby failed:", error);
+    }
+  }
+
+  async startGame() {
+    try {
+      var result = await this.hubSocketService.sendWithPromise<any>("StartGame", {});
+      this.gameState = result;
+    }
+    catch (error) {
+      console.log("ERROR starting game!", error);
     }
   }
 }

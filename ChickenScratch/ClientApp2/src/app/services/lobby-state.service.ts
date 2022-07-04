@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LobbyState } from '../models/lobbyState';
-import { Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { HubSocketService } from './hub-socket.service';
 import { Player } from '../models/player';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class LobbyStateService {
-  private myPlayerStream = new ReplaySubject<Player | null>(1);
+  private myPlayerStream = new BehaviorSubject<Player | null>(null);
   private lobbyStateStream = new ReplaySubject<LobbyState | null>(1);
   private isInLobby = false;
   private player: Player | null = null;

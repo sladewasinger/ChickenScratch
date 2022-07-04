@@ -1,2 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+.hidden {
+  visibility: hidden;
+}
+
+.display-none {
+  display: none;
+}
+
+.form-error {
+  width: 100%;
+  font-size: 80%;
+  color: #dc3545;
+  margin-bottom: 0.5rem;
+  margin-top: -1rem;
+}
