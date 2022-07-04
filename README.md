@@ -38,7 +38,7 @@ From the commandline:
 - Navigate to https://localhost:4201
 
 # SSL Errors
-
+ 
 If you receive an error in Chrome stating the certificate is not valid, then you need to trust the ssl.crt cert that is in the ChickenScratch\ClientApp\ssl\ folder.  
 Open that folder up in file explorer, double click the servert.crt, and install/trust it.
 
