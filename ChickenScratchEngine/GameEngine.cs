@@ -24,13 +24,12 @@ namespace ChickenScratchEngine
 
         private static IReadOnlyList<string> readonlyWords = new List<string>()
         {
-            "abelincoln",
-            "alexanderhamilton",
+            "abe lincoln",
             "ants",
             "anvil",
             "apple",
             "attic",
-            "babyyoda",
+            "yoda",
             "backpack",
             "bacteria",
             "baker",
@@ -45,7 +44,7 @@ namespace ChickenScratchEngine
             "bee",
             "beehive",
             "blanket",
-            "boardgame",
+            "board game",
             "bone",
             "bouquet",
             "bow",
@@ -77,27 +76,27 @@ namespace ChickenScratchEngine
             "desert",
             "diamond",
             "dinner",
-            "disneyworld",
+            "disney world",
             "dolphin",
             "eagle",
             "eclipse",
             "electricity",
             "enter",
             "farm",
-            "ferriswheel",
+            "ferris wheel",
             "fireworks",
             "fog",
             "football",
             "fork",
             "frog",
-            "frontorch",
-            "fryingan",
+            "front porch",
+            "frying pan",
             "gasoline",
             "giraffe",
             "girlscout",
             "gum",
-            "hairdryer",
-            "harrypotter",
+            "hair dryer",
+            "harry potter",
             "hat",
             "hawaii",
             "headphones",
@@ -107,14 +106,13 @@ namespace ChickenScratchEngine
             "japan",
             "jar",
             "jellyfish",
-            "justinbeiber",
             "ketchup",
             "king",
             "koala",
-            "ladybug",
+            "lady bug",
             "lap",
-            "lasvegas",
-            "lawnmower",
+            "las vegas",
+            "lawn mower",
             "leaf",
             "lemon",
             "leprechaun",
@@ -135,18 +133,18 @@ namespace ChickenScratchEngine
             "mitten",
             "monkey",
             "mountains",
-            "mountrushmore",
+            "mount rushmore",
             "music",
             "neck",
-            "newlywed",
-            "northpole",
+            "newly wed",
+            "north pole",
             "nose",
             "olympics",
             "orange",
             "oval",
             "pajamas",
             "panda",
-            "paperlips",
+            "paperclips",
             "paris",
             "parka",
             "pikachu",
@@ -158,7 +156,7 @@ namespace ChickenScratchEngine
             "pool",
             "positive",
             "purchase",
-            "queenelizabeth",
+            "queen elizabeth",
             "rain",
             "rainbow",
             "river",
@@ -173,7 +171,7 @@ namespace ChickenScratchEngine
             "skate",
             "skip",
             "sleep",
-            "sleepingbag",
+            "sleeping bag",
             "smile",
             "snore",
             "snow",
@@ -199,14 +197,14 @@ namespace ChickenScratchEngine
             "thief",
             "tie",
             "toothpaste",
-            "trainstation",
+            "train station",
             "triangle",
             "tuba",
             "turtle",
             "usa",
             "vampire",
             "waffles",
-            "washingtondc",
+            "Washington DC",
             "wasp",
             "whisk",
             "whistle",
@@ -215,6 +213,18 @@ namespace ChickenScratchEngine
             "yoshi",
             "zebra",
         };
+
+        public void AddOrUpdatePlayer(GamePlayer gamePlayer)
+        {
+            var foundPlayer = gameState.Players.FirstOrDefault(x => x.ID == gamePlayer.ID)
+                ?? gameState.Players.FirstOrDefault(x => x.Name == gamePlayer.Name);
+            if (foundPlayer  == null) {
+                gameState.Players.Add(gamePlayer);
+                return;
+            }
+            foundPlayer.Name = gamePlayer.Name;
+        }
+
         private List<string> words = new List<string>(readonlyWords);
 
         protected virtual void OnGameStateUpdated(EventArgs e)
@@ -375,7 +385,7 @@ namespace ChickenScratchEngine
 
         public GameState GetGameStateForPlayer(GamePlayer gamePlayer)
         {
-            if (!gameState.Players.Any())
+            if (!gameState.Players.Any() || gamePlayer == null)
             {
                 return new GameState();
             }

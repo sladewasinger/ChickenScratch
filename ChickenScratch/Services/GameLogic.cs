@@ -54,11 +54,16 @@ namespace ChickenScratch.Hubs
                     .Error($"Could not find lobby with key: '{lobbyKey}'.");
             }
             // TODO: Re-evaluate this. I think we should allow players to re-join...
-            //if (lobby.GameRunning)
-            //{
-            //    return HubResponse
-            //        .Error($"Game is already running! Cannot join!");
-            //}
+            if (lobby.GameRunning)
+            {
+                if (lobby.Engine.GetGamePlayer(player.ID) == null)
+                {
+                    var gamePlayer = lobby.Engine.CreateGamePlayer(player.Name, player.ID);
+                    lobby.Engine.AddOrUpdatePlayer(gamePlayer);
+                }
+                //return HubResponse
+                //    .Error($"Game is already running! Cannot join!");
+            }
 
             lobby.Players.Add(player);
             lobbyRepository.AddOrUpdate(lobby.ID, lobby);
