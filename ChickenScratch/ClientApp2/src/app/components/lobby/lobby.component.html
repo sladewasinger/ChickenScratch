@@ -1,0 +1,14 @@
+<div *ngIf="!lobby">
+  <div *ngIf="myPlayer">
+    <h1>Player Name: {{ myPlayer.name }} </h1>
+  </div>
+</div>
+<div *ngIf="lobby">
+  <div *ngIf="lobby.gameRunning">
+    <app-lobby-game></app-lobby-game>
+  </div>
+  <div *ngIf="!lobby.gameRunning">
+    NO GAME RUNNING
+    <button class="btn btn-primary" (click)="startGame()">Start Game</button>
+  </div>
+</div>

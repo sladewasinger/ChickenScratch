@@ -1,0 +1,18 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title text-center">Create a lobby!</h5>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">@</span>
+          </div>
+          <input type="text" formControlName="lobbyName" class="form-control" placeholder="lobby name"
+            aria-label="Lobby Code" aria-describedby="basic-addon1">
+          <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Create</button>
+        </div>
+        <div class="form-error" [class.hidden]="!isLobbyNameControlInvalid">A lobby name is required.</div>
+      </div>
+    </form>
+  </div>
+</div>

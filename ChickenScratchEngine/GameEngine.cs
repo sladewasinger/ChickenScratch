@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ChickenScratchEngine.Extensions;
 using ChickenScratchEngine.Models;
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,106 +24,207 @@ namespace ChickenScratchEngine
 
         private static IReadOnlyList<string> readonlyWords = new List<string>()
         {
-            "state",
-            "stomach",
+            "abe lincoln",
+            "ants",
+            "anvil",
+            "apple",
+            "attic",
+            "yoda",
+            "backpack",
             "bacteria",
-            "shoulder",
-            "window",
-            "merry-go-round",
+            "baker",
+            "balloon",
+            "bananapeel",
+            "baseball",
+            "basketball",
+            "bathtub",
+            "battery",
+            "beach",
+            "bear",
+            "bee",
+            "beehive",
+            "blanket",
+            "board game",
+            "bone",
+            "bouquet",
+            "bow",
+            "box",
+            "bracelet",
+            "branch",
+            "broccoli",
+            "bruise",
+            "bubble",
+            "bunkbed",
+            "burp",
+            "canoe",
+            "carpet",
+            "cat",
+            "catch",
+            "chandelier",
+            "cheese",
+            "cherry",
+            "cinderella",
+            "claw",
+            "clownfish",
+            "cocoon",
+            "cook",
+            "cookie",
+            "cowboy",
+            "crayon",
+            "crust",
+            "cupcake",
+            "desert",
+            "diamond",
+            "dinner",
+            "disney world",
+            "dolphin",
+            "eagle",
+            "eclipse",
+            "electricity",
+            "enter",
+            "farm",
+            "ferris wheel",
+            "fireworks",
+            "fog",
+            "football",
+            "fork",
+            "frog",
+            "front porch",
+            "frying pan",
+            "gasoline",
+            "giraffe",
+            "girlscout",
+            "gum",
+            "hair dryer",
+            "harry potter",
+            "hat",
+            "hawaii",
+            "headphones",
+            "hospital",
+            "igloo",
+            "inch",
+            "japan",
+            "jar",
+            "jellyfish",
+            "ketchup",
+            "king",
+            "koala",
+            "lady bug",
+            "lap",
+            "las vegas",
+            "lawn mower",
+            "leaf",
+            "lemon",
+            "leprechaun",
+            "library",
+            "lighthouse",
+            "line",
+            "lion",
+            "lizard",
+            "loaf",
+            "mailman",
+            "man",
+            "mars",
+            "mattress",
+            "meerkat",
+            "merrygo-round",
+            "mexico",
+            "mickeymouse",
+            "mitten",
+            "monkey",
+            "mountains",
+            "mount rushmore",
+            "music",
+            "neck",
+            "newly wed",
+            "north pole",
+            "nose",
+            "olympics",
             "orange",
+            "oval",
+            "pajamas",
+            "panda",
+            "paperclips",
+            "paris",
+            "parka",
+            "pikachu",
+            "pilgrim",
+            "pineapple",
+            "pirate",
+            "plant",
+            "platypus",
+            "pool",
+            "positive",
+            "purchase",
+            "queen elizabeth",
+            "rain",
+            "rainbow",
+            "river",
+            "robinhood",
+            "sailboat",
+            "salamander",
+            "scorpion",
+            "scratch",
+            "shade",
+            "shoulder",
+            "shrek",
+            "skate",
+            "skip",
+            "sleep",
+            "sleeping bag",
+            "smile",
+            "snore",
+            "snow",
+            "snowball",
+            "snowflake",
+            "socks",
+            "spongebob",
+            "stairs",
+            "state",
+            "stick",
+            "stomach",
+            "strawberry",
+            "study",
+            "summer",
+            "sunglasses",
+            "superman",
+            "swimmingpool",
+            "swing",
+            "t-rex",
             "teacher",
             "teapot",
-            "pool",
-            "hair dryer",
-            "lap",
-            "bathtub",
-            "snow",
-            "battery",
-            "paper clips",
-            "library",
-            "frying pan",
-            "positive",
-            "broccoli",
-            "pajamas",
-            "claw",
-            "gum",
-            "tuba",
-            "music",
-            "shade",
-            "dinner",
-            "electricity",
-            "fork",
-            "cocoon",
-            "anvil",
-            "lighthouse",
-            "plant",
-            "parka",
-            "stick",
-            "clownfish",
-            "gasoline",
-            "loaf",
-            "pineapple",
-            "sailboat",
-            "newlywed",
-            "carpet",
-            "skate",
-            "inch",
-            "enter",
-            "front porch",
-            "ladybug",
-            "canoe",
-            "mattress",
-            "desert",
-            "monkey",
-            "lemon",
+            "text",
+            "thief",
+            "tie",
+            "toothpaste",
+            "train station",
             "triangle",
-            "blanket",
-            "rain",
-            "swing",
-            "cat",
-            "hat",
-            "lizard",
-            "ladybug",
-            "bear",
-            "oval",
-            "balloon",
-            "ants",
-            "bow",
-            "basketball",
-            "crayon",
-            "stairs",
-            "backpack",
+            "tuba",
             "turtle",
-            "line",
-            "smile",
-            "cookie",
-            "mitten",
-            "sunglasses",
-            "neck",
-            "box",
-            "diamond",
-            "bee",
-            "river",
-            "Mickey Mouse",
-            "socks",
-            "man",
-            "cherry",
-            "apple",
+            "usa",
+            "vampire",
+            "waffles",
+            "Washington DC",
+            "wasp",
+            "whisk",
+            "whistle",
+            "window",
+            "wreath",
+            "yoshi",
             "zebra",
-            "nose",
-            "leaf",
-            "snowflake",
-            "bracelet",
-            "football",
-            "cheese",
-            "jar",
-            "baseball",
-            "branch",
-            "bone",
-            "jellyfish",
-            "king",
-            "swimming pool"
         };
+
+        public void AddOrUpdatePlayer(GamePlayer gamePlayer)
+        {
+            var foundPlayer = gameState.Players.FirstOrDefault(x => x.ID == gamePlayer.ID)
+                ?? gameState.Players.FirstOrDefault(x => x.Name == gamePlayer.Name);
+            if (foundPlayer  == null) {
+                gameState.Players.Add(gamePlayer);
+                return;
+            }
+            foundPlayer.Name = gamePlayer.Name;
+        }
+
         private List<string> words = new List<string>(readonlyWords);
 
         protected virtual void OnGameStateUpdated(EventArgs e)
@@ -217,8 +319,18 @@ namespace ChickenScratchEngine
 
         public bool GuessWord(GamePlayer gamePlayer, string word)
         {
-            word = word.Replace(" ", string.Empty).ToLower();
-            string currentWord = gameState.CurrentWord.Replace(" ", string.Empty).ToLower();
+            string sanitize(string x)
+            {
+                var str = x
+                    .Singularize()
+                    .Replace(" ", string.Empty)
+                    .Replace("-", string.Empty)
+                    .Replace("_", string.Empty)
+                    .ToLower();
+                return str;
+            };
+            word = sanitize(word);
+            string currentWord = sanitize(gameState.CurrentWord);
             if (word == currentWord)
             {
                 if (!gamePlayer.HasGuessedCorrectly)
@@ -232,7 +344,7 @@ namespace ChickenScratchEngine
                     .Where(x => x.ID != gameState.ActivePlayer.ID)
                     .All(x => x.HasGuessedCorrectly))
                 {
-                    SetTimerToOneSecond();
+                    SetTimerToOneSecond(); // End the game.
                 }
 
                 return true;
@@ -273,7 +385,7 @@ namespace ChickenScratchEngine
 
         public GameState GetGameStateForPlayer(GamePlayer gamePlayer)
         {
-            if (!gameState.Players.Any())
+            if (!gameState.Players.Any() || gamePlayer == null)
             {
                 return new GameState();
             }
@@ -283,7 +395,8 @@ namespace ChickenScratchEngine
                 return gameState;
             }
 
-            var config = new MapperConfiguration(cfg => {
+            var config = new MapperConfiguration(cfg =>
+            {
                 cfg.CreateMap<GameState, GameState>();
             });
             IMapper iMapper = config.CreateMapper();
