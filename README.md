@@ -3,7 +3,7 @@
 A multiplayer drawing game where one person draws and the other people guess what the drawing is! The first person to guess gets the most points.  
 https://chickenscratch.azurewebsites.net/
 
-## SignalR\*like technology
+## SignalR-like technology
 
 I'm using WebSockets and sort of re\*creating SignalR's "hub" pattern to manage them. The true intent of this repo is to create and prototype an implementation of a decent, free dotnet core & JavaScript WebSocket library. The server side is C#, and the client side is JavaScript. I've dubbed the web socket project code "HubSockets", and if all goes well I will separate the code out into its own repository.
 
