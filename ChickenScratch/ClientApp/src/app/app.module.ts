@@ -13,6 +13,7 @@ import { PreLobbyComponent } from './components/pre-lobby/pre-lobby.component';
 import { LobbyGameComponent } from './components/lobby-game/lobby-game.component';
 import { JoinLobbyComponent } from './components/pre-lobby/components/join-lobby/join-lobby.component';
 import { CreateLobbyComponent } from './components/pre-lobby/components/create-lobby/create-lobby.component';
+import { HubSocketService } from 'hubsockets-client';
 
 @NgModule({
   declarations: [
@@ -22,11 +23,9 @@ import { CreateLobbyComponent } from './components/pre-lobby/components/create-l
     PreLobbyComponent,
     LobbyGameComponent,
     JoinLobbyComponent,
-    CreateLobbyComponent
+    CreateLobbyComponent,
   ],
-  entryComponents: [
-    CreatePlayerFormComponent
-  ],
+  entryComponents: [CreatePlayerFormComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -34,9 +33,9 @@ import { CreateLobbyComponent } from './components/pre-lobby/components/create-l
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    FontAwesomeModule
+    FontAwesomeModule,
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [HubSocketService],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

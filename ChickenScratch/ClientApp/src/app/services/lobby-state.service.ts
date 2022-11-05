@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { LobbyState } from '../models/lobbyState';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { HubSocketService } from './hub-socket.service';
 import { Player } from '../models/player';
 import { Router } from '@angular/router';
+import { HubSocketService } from 'hubsockets-client';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LobbyStateService {
   private myPlayerStream = new BehaviorSubject<Player | null>(null);
@@ -14,10 +14,14 @@ export class LobbyStateService {
   private isInLobby = false;
   private player: Player | null = null;
 
-  constructor(private hubSocketService: HubSocketService,
-    private router: Router) {
-    this.hubSocketService.listenOn<LobbyState>("LobbyStateUpdated").subscribe(x => this.updateLobbyState(x));
-    this.hubSocketService.onDisconnect().subscribe(x => this.onDisconnect(x));
+  constructor(
+    @Inject(HubSocketService) private hubSocketService: HubSocketService,
+    private router: Router
+  ) {
+    this.hubSocketService
+      .listenOn<LobbyState>('LobbyStateUpdated')
+      .subscribe((x) => this.updateLobbyState(x));
+    this.hubSocketService.onDisconnect().subscribe((x) => this.onDisconnect(x));
   }
 
   get PlayerIsInLobby() {
@@ -29,7 +33,10 @@ export class LobbyStateService {
   }
 
   private updateLobbyState(lobbyState: LobbyState | null) {
-    this.isInLobby = lobbyState?.lobbies.find(x => x.players.some(p => p.id == this.player?.id)) != null;
+    this.isInLobby =
+      lobbyState?.lobbies.find((x) =>
+        x.players.some((p) => p.id == this.player?.id)
+      ) != null;
     this.lobbyStateStream.next(lobbyState);
   }
 
@@ -43,7 +50,7 @@ export class LobbyStateService {
   }
 
   private onDisconnect(e: any) {
-    console.log("Lobby service - hub disconnected");
+    console.log('Lobby service - hub disconnected');
     this.updateMyPlayer(null);
     this.updateLobbyState(null);
     this.isInLobby = false;
